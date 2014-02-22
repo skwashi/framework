@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="30" height="320" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="mountain_landscape_23" tilewidth="32" tileheight="32">
+  <image source="tiles/mountain_landscape_23.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="257" name="tree2-final" tilewidth="32" tileheight="32">
+  <image source="tiles/tree2-final.png" width="256" height="256"/>
+  <tile id="19">
+   <properties>
+    <property name="collision" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="321" name="textures_refraction1" tilewidth="32" tileheight="32">
+  <image source="../tiles/textures_refraction1.jpg" width="512" height="512"/>
+ </tileset>
+ <layer name="Rock" width="30" height="320">
+  <data encoding="base64" compression="zlib">
+   eJzlnUtu20AQBXmVxEr2jp3c/2ihADVcGFBLVwmkAcLejVvTn9evX1O3bds+9+fv/vzbvu/nx/783J+3/bntz8fj96/9+f2N577vz5/HeZ+P8+9/X8Xe2+N/uJK9lT/f/7btnXNte+d3Eb/3c69kr3m/H9uXT5n+fNu+YteMX8bR/THtfcPZpj/P/d7Ptuxl7NrxO5+xae/c75xv2cs4sv15/Mr058kXtj/zczb9mXnDrEf0ZfN+WYtMfx78atffsdPGk2Pr2G3aO35V5Gcbb7A3Mu1lHNn5in2ZHb9FvhqfMvMVMY7dLxT5uYpf5iu7/hb1aGqRnZ95boWvinpk8zmTN+Z8Gz/b9Yi9rxm/5HIKftLOzxM/Nv/MPtT0Z9pa5Gebbx9/svNzxceSI7T7BcaSeb+sDbY/T30w69F8xkV/ZPPPzFcFXzf10MbPBd9e4Ely7fb9ciZa9As23ijmv+RyinmZHb8rz1/gK9OfmTNse9mHnl2fM7Fb8HUFHzt+VfRH7LsL/tnGk+xD7Xpkz0OZM2y8wTsu5vuFvUV+LvAkMbvtz0V+pqav6hds/pmxZOfnYn5U4slCj0SfLupRNV+4QvxSM1LMF+x+n7Wo0jOY8UvsXOHJQp9j8xvEzhWeLOYpFR9b6EUrfU6hByaus/v9wl72CsX92v68zp0Le+37ZQ9c8M9GPVrzpKVHetanmPaa+3RHPKFpL3sj+35ZC21/tuZla5608PPRXNK0lz5l+7Opv1rv17bXnqc8482K+DXtXXkk25+tfmHtQwueoeIJ2QOfXWe+7nefXde39gvFXqo9l6z67mIPyO5T1vpb7JWzNhTxewWd24qvCp6w0EHZ+Zmct9mn2HPJo3m3cb9H8yMTxxKzm/fL/GzeL+PX7FN4pnm/9l7b0bzb7stMneqzfQ2bJ7R4/mfzfTt+rTns0fsZLDxJf7bz87qfYuYr6lVs3qywt6i/9Ct7bsWzi/0yW09Y8EjkzMw+pdpPIc9Q6CeLfY1Sz2/zSDzTvl/2wGd/P2F5v8X+L2PI5vmL/UF7vv8q+pxq37ngvdkv2Hij2teo6pE9pyOOted01H6dfT90nXcXeu8iX9l4kj5V6ApsfMW6b99vgTcYu8X+ke3PnA3a+dnkzY50BdVcstgvK/JVoStgLbJ1FEX8ljo3Yp1CB1XwVzae5B5BtX9k3m+Jr0x97CvgZ9akq+zT2fX3FfBGoXOzdX32fsqqqy915rY/F/v7ts5tvV/bXmJ2+37N/ZQjnaqtMy/4ds41Cr7dvl/GUcFvWLqvGl+xTyn0KsUekLkfevR9MXb/yx7Jzs8Ffua5Z+dj2RvZ80Fy3wW/UeWrYq/Nzs/VfJC2FvxGod/gzuRVvp/OxpP2nsirvO/Lxs+1vVW/b82Pnr0n0N6LsfZx6vfW0l47jog3irpQ4Bw7b9Cvqr6s4Pntuk8safOirIXF9yDYvGjBA7MmFPFbzGGLPpT6Z5tnYK9iz+lsXVDFe3PmbPtzsSdS2cteocjPdj0iJ1rl52KvrdDlVnONMn4rXZBdj9grFPm5qL/sRc/+vUvUQBX4yt6jr+bOE0P/AT9esjY=
+  </data>
+ </layer>
+ <layer name="Cloudscape" width="30" height="320" opacity="0.48">
+  <data encoding="base64" compression="zlib">
+   eJzt1zdTHEEQQOHFGyESPAIShDcJHiH+fy6EhwRvE7yQKF54pWgGmoLi3lf10p0Lprf3ikKSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJEmSJH12vyqKYoV+0yqt0Tpt0CZt0Tbt0G5F3Ll7PGufDuiQjuiYTuiUzuicLugy8NwrnnVNN3RLd3RPD/SHHukv/aOnwHOrKouimmqoluqonhqokb5QE32l5sq4c1t4Viu1UTt1UCd1UTd9ox7qpb7Ac/t51ncaoEEaomEaoVEao3GaoMnAc6d41jTN0CzN0Twt0CL9oCX6ScuB50qSJH1G/lfwv4L/FcpHyry/hZR5j/r9pe+rlHmP+v2l76uUeU+R+75KmfcUue+rlHlPkfu+Spn3FOX6vnL/u//d/6/nHDlHzpGkt5S7Z6L2Uu6eidpLuXsmai/l7pmovZS7Z6L2Uu6eidpLuXvmPfeS33h+4/mNF8+5cq4+ylxF3MWXzFXuXYyamdy7GDUzuXcxamZy72LUzOTexaiZyb2L5b6LpP89A4IozYY=
+  </data>
+ </layer>
+ <layer name="Meta" width="30" height="320" opacity="0.46">
+  <data encoding="base64" compression="zlib">
+   eJztzbEJACAMAMG4g/vPktGsLWxEEpA7+PojAAAAAAAAAAAAAAAAAAAAAAAAAAAAAICTOfYqvx18fX19fX19fX19fX19fX19fa+/6evr6+vr6+v76beFr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vr6/vy+8CG+IYwQ==
+  </data>
+ </layer>
+ <objectgroup name="Enemies" width="30" height="320">
+  <object x="194" y="9633" width="33" height="63"/>
+  <object x="255" y="9633" width="33" height="63"/>
+  <object x="322" y="9633" width="33" height="63"/>
+  <object x="383" y="9633" width="33" height="63"/>
+  <object x="640" y="9634" width="33" height="63"/>
+  <object x="579" y="9634" width="33" height="63"/>
+  <object x="451" y="9634" width="33" height="63"/>
+  <object x="512" y="9634" width="33" height="63"/>
+  <object x="767" y="9634" width="33" height="63"/>
+  <object x="706" y="9634" width="33" height="63"/>
+ </objectgroup>
+</map>

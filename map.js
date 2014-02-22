@@ -9,14 +9,15 @@ function Map (filename) {
   this.numRows = 0;
   this.numColumns = 0; 
   this.tileLayers = []; // layers for generating the background map
-  this.metaLayer = {}; // layer called "meta" in Tiled with meta information (e.g. collision)
-  this.objectLayers = [];   // for enemies, powerups, etc
+  this.metaLayer = {}; // layer called "meta" with metainfo (e.g. collision)
+  this.objectLayers = []; // for enemies, powerups, etc
   this.ready = false;
   this.canvas = null;
   this.context = null;
 
   this.getTileCoords = function (vector) {
-    return {row: Math.floor(vector.y / this.tileHeight), col: Math.floor(vector.x / this.tileWidth)};
+    return {row: Math.floor(vector.y / this.tileHeight), 
+	    col: Math.floor(vector.x / this.tileWidth)};
   }
 
   this.getTileset = function (gid) {
@@ -32,7 +33,8 @@ function Map (filename) {
       return {};
     var tileset = this.getTileset(gid);
     var offset = tileset.gids.first;
-    if (tileset.hasOwnProperty("properties") && tileset.properties.hasOwnProperty(gid-offset))
+    if (tileset.hasOwnProperty("properties")
+	&& tileset.properties.hasOwnProperty(gid-offset))
       return tileset.properties[gid-offset];
     else
       return {};
@@ -73,9 +75,10 @@ function Map (filename) {
 	* this.tilesets[i].height / json.tilesets[i].tileheight;
       this.tilesets[i].gids = {};
       this.tilesets[i].gids.first = json.tilesets[i].firstgid;
-      this.tilesets[i].gids.last = this.tilesets[i].gids.first + this.tilesets[i].numTiles - 1;
+      this.tilesets[i].gids.last = 
+	this.tilesets[i].gids.first + this.tilesets[i].numTiles - 1;
       this.tilesets[i].properties = json.tilesets[i].tileproperties;
-      this.tilesets[i].image = $("<img />", {src: json.tilesets[0].image})[0];
+      this.tilesets[i].image = $("<img />", {src: json.tilesets[i].image})[0];
       this.tilesets[i].image.onload = $.proxy(function () {
 	this.tilesetsToLoad--;
 	if (this.tilesetsToLoad == 0)
@@ -100,8 +103,13 @@ function Map (filename) {
 	}
 	if (layer.name == "meta" || layer.name == "Meta")
 	  this.metaLayer.gids = gids;
-	else 
-	  this.tileLayers.push({gids: gids});
+	else {
+	  if (layer.hasOwnProperty("properties") && layer["properties"].hasOwnProperty("scale"))
+	    var scale = layer.properties["scale"];
+	  else
+	    var scale = 1;
+	  this.tileLayers.push({gids: gids, opacity: layer.opacity, scale: scale});
+	}
       }
     }
     
@@ -114,6 +122,8 @@ function Map (filename) {
     var width = this.width;
     var height = this.height;
     var tileset;
+    
+    this.context.globalAlpha = layer.opacity;
     this.context.clearRect(0, 0, width, height);
     
     for (var row = 0; row < this.numRows; row++) {
@@ -141,6 +151,7 @@ function Map (filename) {
     var image = new Image();
     image.src = this.canvas.toDataURL();
     layer.image = image;
+    this.context.globalAlpha = 1;
   }
 
   this.renderTileLayers = function () {
@@ -149,37 +160,66 @@ function Map (filename) {
     this.ready = true;
   }
 
-  this.drawLayer = function(context, num, vector, width, height) {
-    var image = this.tileLayers[num].image;
-    var bottom = image.height;
-    var right = image.width;
-    var x = (vector.x < 0) ? (vector.x % right) + right : vector.x % right;
-    var y = (vector.y < 0) ? (vector.y % bottom) + bottom : vector.y % bottom;
-
-    if (y + height > bottom) {
-      if (x + width > right) {
-	context.drawImage(image, x, y, right - x, bottom - y, 0, 0, right - x, bottom - y);
-	context.drawImage(image, 0, y, width - (right - x), bottom - y, right - x, 0, width - (right - x), bottom - y);
-	context.drawImage(image, x, 0, right - x, width - (bottom-y), 0, bottom-y, right - x, width - (bottom-y));
-	context.drawImage(image, 0, 0, width - (right - x), width - (bottom-y), right - x, bottom-y, width - (right - x), width - (bottom-y));
-      } else {
-	context.drawImage(image, x, y, width, bottom - y, 0, 0, width, bottom-y);
-	context.drawImage(image, x, 0, width, height - (bottom-y), 0, bottom-y, width, height - (bottom-y));
-      }
-    } else if (x + width > right) {
-      context.drawImage(image, x, y, right - x, height, 0, 0, right - x, height);
-      context.drawImage(image, 0, y, width - (right - x), height, right - x, 0, width - (right - x), height);
-    } else {
-      context.drawImage(image, x, y, width, height, 0, 0, width, height);
-    }    
-  }
-
-  this.drawLayers = function(context, vector, width, height) {
-    for (var i = 0; i < this.tileLayers.length; i++)
-      this.drawLayer(context, i, vector, width, height);
-  }
-
   this.makeGrid = function (openX, openY) {
     return new Grid(this.width, this.height, openX, openY);
   }
+
+  this.getImage = function (n) {
+    return this.tileLayers[n].image;
+  }
+  
+  this.getImages = function () {
+    var images = [];
+    for (var i = 0; i < this.tileLayers.length; i++)
+      images.push(this.getImage(i));
+  }
+  
+  this.getPicture = function(context, n) {
+    return new Picture(this.tileLayers[n].image, context, this.tileLayers[n].scale);
+  }
+
+  this.getPictures = function(context) {
+    var pictures = [];
+    for (var i = 0; i < this.tileLayers.length; i++) {
+      pictures.push(this.getPicture(i));
+    }
+    return pictures;
+  }
+
+  this.getScale = function (n) {
+    return this.tileLayers[n].scale;
+  }
+
+  this.getOpacity = function (n) {
+    return this.tileLayers[n].opacity;
+  }
+
+  this.makeCanvas = function (n) {
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    canvas.width = this.width;
+    canvas.height = this.height;
+
+    if (n === undefined) {
+      for (var i = 0; i < this.tileLayers.length; i++)
+	context.drawImage(this.tileLayers[i].image, 0, 0);
+    } else {
+      var layer = this.tileLayers[n];
+      context.drawImage(layer.image, 0, 0);      
+    }
+    
+    return canvas;
+  }
+
+  this.makeImage = function () {
+    this.context.globalAlpha = 1;
+    this.context.clearRect(0, 0, this.width, this.height);
+    for (var i = 0; i < this.tileLayers.length; i++)
+      this.context.drawImage(this.tileLayers[i].image, 0, 0);
+    var image = new Image();
+    image.src = this.canvas.toDataURL();
+    return image;
+  }
+  
+
 }

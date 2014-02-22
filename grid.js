@@ -12,10 +12,18 @@ function Grid(width, height, openX, openY) {
     this.openY = openY;
   }
 
+  this.projectX = function (x) {
+    var gx = (x < 0) ? (x % this.width) + this.width : x % this.width;
+    return (gx == this.width) ? 0 : gx;
+  }
+
+  this.projectY = function (y) {
+    var gy = (y < 0) ? (y % this.height) + this.height : y % this.height;
+    return (gy == this.height) ? 0 : gy;
+  }
+  
   this.project = function (vector) {
-    var gx = vector.x % this.width;
-    var gy = vector.y % this.height;
-    return new Vector((gx < 0) ? gx+this.width : gx, (gy < 0) ? gy+this.height : gy); 
+    return new Vector(this.projectX(vector.x), this.projectY(vector.y));
   }
 
   this.projectRect = function (vector, width, height) {
@@ -50,20 +58,44 @@ function Camera(grid, pos, width, height, vel) {
   this.pos = pos.copy();
   this.initialPos = pos.copy();
   this.vel = vel.copy();
-  this.intialVel = vel.copy();
+  this.initialVel = vel.copy();
   
   this.set = function(pos, vel) {
     this.pos.set(pos);
-    this.v.set(vel);
+    this.vel.set(vel);
   }
 
-  this.reset = function() {
+  this.reset = function () {
     this.set(this.initialPos, this.initialVel);
   }
 
+  this.getPos = function () {
+    return this.grid.project(this.pos);
+  }
+
+  this.getVel
+
+  this.getCenter = function () {
+    return new Vector(this.pos.x + (this.width-1)/2, this.pos.y + (this.height-1)/2);
+  }
+
   this.move = function () {
-    this.pos.increase(this.vel);
-    this.pos = this.grid.projectRect(this.pos, this.width, this.height);
+    //this.pos.increase(this.vel);
+    var x = this.pos.x += this.vel.x
+    var y = this.pos.y += this.vel.y
+
+    if (x < 0) 
+      x = (this.grid.openX) ? x : 0;  
+    else if (x > this.grid.width - this.width)
+      x = (this.grid.openX) ? x : this.grid.width - this.width;
+
+    if (y < 0) 
+      y = (this.grid.openY) ? y : 0;  
+    else if (y > this.grid.height - this.height)
+      y = (this.grid.openY) ? y : this.grid.height - this.height;
+    
+    this.pos.init(x, y);
+    //this.pos = this.grid.projectRect(this.pos, this.width, this.height);
   }
   
 }
