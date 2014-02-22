@@ -47,4 +47,3 @@ Vector.prototype.length = function () {
 Vector.prototype.dot = function (v) {
   return this.x * v.x + this.y * v.y;
 };
-
