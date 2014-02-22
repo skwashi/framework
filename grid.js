@@ -98,4 +98,11 @@ function Camera(grid, pos, width, height, vel) {
     //this.pos = this.grid.projectRect(this.pos, this.width, this.height);
   }
   
+  this.canSee = function (rect) {
+    return (rect.x + rect.width <= this.pos.x ||
+	    rect.x <= this.pos.x + this.width ||
+	    rect.y + rect.height <= this.pos.y ||
+	    rect.y <= this.pos.y + this.height);
+  }
+  
 }

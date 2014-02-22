@@ -47,10 +47,10 @@ Test.prototype.drawCrosshair = function () {
 Test.prototype.makeBlot = function () {
   var w = 21;
   var h = 21;
-  var x = grid.projectX(cam.getCenter().x - w/2);
-  var y = grid.projectY(cam.getCenter().y - h/2);
-  testContext.fillStyle = "yellow";
-  testContext.fillRect(x,y,w,h);
+  var x = cam.getCenter().x - w/2;
+  var y = cam.getCenter().y - h/2;
+  var rect = new Drawable(x, y, w, h, "yellow");
+  rect.draw(testContext, cam, true);
 }
 
 Test.prototype.update = function () {
