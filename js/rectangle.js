@@ -45,4 +45,23 @@ function Rectangle(x, y, width, height) {
     return rectangles;
   };
 
+  this.span = function (rectangle) {
+    var x = Math.min(this.x, rectangle.x);
+    var y = Math.min(this.y, rectangle.y);
+    var w = Math.max(this.x + this.width - x, rectangle.x + rectangle.width - x);
+    var h = Math.max(this.y + this.height - y, rectangle.y + rectangle.height - y);
+    return new Rectangle(x, y, w, h);
+  }
+
+  
+  this.collides = function (rectangle) {
+    var x = this.x; var y = this.y;
+    var w = this.width; var h = this.height;
+    var rx = rectangle.x; var ry = rectangle.y;
+    var rw = rectangle.width; var rh = rectangle.height;
+    
+    return (rx <= x + w && x <= rx + rw &&
+	    ry <= y + h && y <= ry + rh);
+  }
+
 }

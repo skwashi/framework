@@ -58,7 +58,6 @@ Test.prototype.update = function () {
   this.handleInput();
   cam.move();
   this.drawCrosshair();
- // console.log(cam.getCenter());
 }
 
 
@@ -72,8 +71,18 @@ function render() {
     imageHandler.addImage(repo.get(backgrounds[1]), context, 1/6);
     imageHandler.addImage(map.getImage(0), context, map.getScale(0));
     imageHandler.addImage(map.getImage(1), context, map.getScale(1));
-    //imageHandler.addPictures(map.getPictures(context));
+    colArray = map.makeColArray();
+    colHandler = new CollisionHandler(colArray, map.tileWidth, map.tileHeight);
     go = true;
+    r1 = new Rectangle(0,0,60,60);
+    r2 = new Rectangle(40,40,50,50);
+    r3 = new Rectangle(61,61, 30,30);
+    r4 = new Rectangle(70,70,40,40);
+    colHandler.registerObject(r1);
+    colHandler.registerObject(r2);
+    colHandler.registerObject(r3);
+    colHandler.registerObject(r4);
+    map.makePropArray();
   }
   if (go == true) {
     imageHandler.drawImages(cam.pos.x, cam.pos.y, cam.width, cam.height);
@@ -92,6 +101,8 @@ var cam;
 var test = new Test();
 var imageHandler = new ImageHandler();
 var go = false;
+var colHandler;
+var colArray;
 
 function init() {
   map.load();

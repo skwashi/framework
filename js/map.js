@@ -14,10 +14,23 @@ function Map (filename) {
   this.ready = false;
   this.canvas = null;
   this.context = null;
+  this.propArray = null;
+  this.colArray = null;
 
   this.getTileCoords = function (vector) {
     return {row: Math.floor(vector.y / this.tileHeight), 
 	    col: Math.floor(vector.x / this.tileWidth)};
+  }
+
+  this.getGids = function (row, col) {
+    var gids = [];
+    for (var i = 0; i < this.tileLayers.length; i++)
+      gids.push(this.tileLayers[row][col]);
+  };
+
+  this.getMetaGid = function (vector) {
+    var tc = this.getTileCoords(vector);
+    return this.metaLayer[tc.row][tc.col];
   }
 
   this.getTileRect = function (vector) {
@@ -34,34 +47,37 @@ function Map (filename) {
     return this.tilesets[i];
   }
 
-  this.getTileProperties = function (gid) {
+  this.getGidProperties = function (gid) {
     if (gid == 0)
       return {};
     var tileset = this.getTileset(gid);
     var offset = tileset.gids.first;
-    if (tileset.hasOwnProperty("properties")
-	&& tileset.properties.hasOwnProperty(gid-offset))
-      return tileset.properties[gid-offset];
+    if (tileset.hasOwnProperty("tileProperties") &&
+	tileset.tileProperties.hasOwnProperty(gid-offset))
+      return tileset.tileProperties[gid - offset];
     else
       return {};
   }
 
   this.getProperties = function(vector) {
-    var row = (this.getTileCoords(vector)).row;
-    var col = (this.getTileCoords(vector)).col;
     if (this.metaLayer.hasOwnProperty("gids"))
-      return this.getTileProperties(this.metaLayer.gids[row][col]);
+      return this.getGidProperties(this.metaGid(vector));
     else
       return {};
   }
 
-  this.hasProperty = function(vector, property, value) {
-    var props = this.getProperties(vector);
+  this.gidHasProperty = function (gid, property, value) {
+    var props = this.getGidProperties(gid);
     if (value === undefined)
       return props.hasOwnProperty(property);
     else
       return (props.hasOwnProperty(property) &&
 	      props[property] == value);
+  }
+
+  this.hasProperty = function(vector, property, value) {
+    var gid = this.metaGid(vector);
+    return this.gidHasProperty(gid);
   }
   
   this.load = function () {
@@ -95,7 +111,11 @@ function Map (filename) {
       this.tilesets[i].gids.first = json.tilesets[i].firstgid;
       this.tilesets[i].gids.last = 
 	this.tilesets[i].gids.first + this.tilesets[i].numTiles - 1;
-      this.tilesets[i].properties = json.tilesets[i].tileproperties;
+      this.tilesets[i].properties = json.tilesets[i].properties;
+      if (json.tilesets[i].hasOwnProperty("tileproperties"))
+	this.tilesets[i].tileProperties = json.tilesets[i].tileproperties;
+      else
+	this.tilesets[i].tileProperties = {};
       this.tilesets[i].image = $("<img />", {src: json.tilesets[i].image})[0];
       this.tilesets[i].image.onload = $.proxy(function () {
 	this.tilesetsToLoad--;
@@ -237,7 +257,56 @@ function Map (filename) {
     var image = new Image();
     image.src = this.canvas.toDataURL();
     return image;
-  }  
+  };  
+
+  this.makePropArray = function () {
+    var gid;
+    var props;
+    var propArray = [];
+
+    for (var row = 0; row < this.numRows; row++) {
+      propArray[row] = [];
+      for (var col = 0; col < this.numColumns; col++) {
+	propArray[row][col] = {};
+	for (var i = 0, len = this.tileLayers.length; i < len; i++) {
+	  gid = this.tileLayers[i].gids[row][col]
+	  props = this.getGidProperties(gid);
+	  propArray[row][col] = _.extend(propArray[row][col], props)
+	}
+	if (!_.isEmpty(propArray[row][col]))
+	  console.log(propArray[row][col]);
+      }
+    }
+    this.propArray = propArray;
+  }; 
+
+  this.getPropArray = function () {
+    if (this.getPropArray = null)
+      this.makePropArray;
+    return this.propArray;
+  }
+
+  this.makeColArray = function () {
+    var colArray = [];
+    
+    if (this.metaLayer.hasOwnProperty("gids")) {
+      
+      for (var row = 0; row < this.numRows; row++) {
+	colArray[row] = [];
+	for (var col = 0; col < this.numColumns; col++) {
+	  if (this.gidHasProperty(this.metaLayer.gids[row][col], "collision"))
+	    colArray[row][col] = 1;
+	  else
+	    colArray[row][col] = 0;
+	}
+	
+      }
+      
+    }
+    
+    this.colArray = colArray;
+    return this.colArray;
+  };
 
 }
 
