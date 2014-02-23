@@ -20,24 +20,22 @@ function Map (filename) {
   this.getTileCoords = function (vector) {
     return {row: Math.floor(vector.y / this.tileHeight), 
 	    col: Math.floor(vector.x / this.tileWidth)};
-  }
+  };
 
   this.getGids = function (row, col) {
-    var gids = [];
-    for (var i = 0; i < this.tileLayers.length; i++)
-      gids.push(this.tileLayers[row][col]);
+    return _.map(this.tileLayers, function (layer) {return layer.gids[row][col];});
   };
 
   this.getMetaGid = function (vector) {
     var tc = this.getTileCoords(vector);
     return this.metaLayer[tc.row][tc.col];
-  }
+  };
 
   this.getTileRect = function (vector) {
     var tc = this.getTileCoords(vector);
     return new Rectangle(tc.col * this.tileWidth, tc.row * this.tileHeight,
 			 this.tileWidth, this.tileHeight);
-  }
+  };
   
   this.getTileset = function (gid) {
     var i = 0;
@@ -45,7 +43,7 @@ function Map (filename) {
     while(id > this.tilesets[i].gids.last)
       i++;
     return this.tilesets[i];
-  }
+  };
 
   this.getGidProperties = function (gid) {
     if (gid == 0)
@@ -57,14 +55,14 @@ function Map (filename) {
       return tileset.tileProperties[gid - offset];
     else
       return {};
-  }
+  };
 
   this.getProperties = function(vector) {
     if (this.metaLayer.hasOwnProperty("gids"))
       return this.getGidProperties(this.metaGid(vector));
     else
       return {};
-  }
+  };
 
   this.gidHasProperty = function (gid, property, value) {
     var props = this.getGidProperties(gid);
@@ -73,12 +71,12 @@ function Map (filename) {
     else
       return (props.hasOwnProperty(property) &&
 	      props[property] == value);
-  }
+  };
 
   this.hasProperty = function(vector, property, value) {
     var gid = this.metaGid(vector);
     return this.gidHasProperty(gid);
-  }
+  };
   
   this.load = function () {
     $.getJSON(filename).done($.proxy(this.loadData, this));	      
@@ -123,7 +121,7 @@ function Map (filename) {
 	  this.loadLayers();
       }, this);
     }
-  }
+  };
 
   this.loadLayers = function() {
     var layer, gids;
@@ -152,7 +150,7 @@ function Map (filename) {
     }
     
     this.renderTileLayers();
-  }
+  };
   
   this.renderTileLayer = function(layer) {
     var gid, id, tx, ty, x, y;
@@ -190,31 +188,31 @@ function Map (filename) {
     image.src = this.canvas.toDataURL();
     layer.image = image;
     this.context.globalAlpha = 1;
-  }
+  };
 
   this.renderTileLayers = function () {
     for (var l = 0, len = this.tileLayers.length; l < len; l++)
       this.renderTileLayer(this.tileLayers[l]);
     this.ready = true;
-  }
+  };
 
   this.makeGrid = function (openX, openY) {
     return new Grid(this.width, this.height, openX, openY);
-  }
+  };
 
   this.getImage = function (n) {
     return this.tileLayers[n].image;
-  }
+  };
   
   this.getImages = function () {
     var images = [];
     for (var i = 0; i < this.tileLayers.length; i++)
       images.push(this.getImage(i));
-  }
+  };
   
   this.getPicture = function(context, n) {
     return new Picture(this.tileLayers[n].image, context, this.tileLayers[n].scale);
-  }
+  };
 
   this.getPictures = function(context) {
     var pictures = [];
@@ -222,15 +220,15 @@ function Map (filename) {
       pictures.push(this.getPicture(i));
     }
     return pictures;
-  }
+  };
 
   this.getScale = function (n) {
     return this.tileLayers[n].scale;
-  }
+  };
 
   this.getOpacity = function (n) {
     return this.tileLayers[n].opacity;
-  }
+  };
 
   this.makeCanvas = function (n) {
     var canvas = document.createElement("canvas");
@@ -247,7 +245,7 @@ function Map (filename) {
     }
     
     return canvas;
-  }
+  };
 
   this.makeImage = function () {
     this.context.globalAlpha = 1;
@@ -258,6 +256,7 @@ function Map (filename) {
     image.src = this.canvas.toDataURL();
     return image;
   };  
+
 
   this.makePropArray = function () {
     var gid;
@@ -273,40 +272,39 @@ function Map (filename) {
 	  props = this.getGidProperties(gid);
 	  propArray[row][col] = _.extend(propArray[row][col], props)
 	}
-	if (!_.isEmpty(propArray[row][col]))
-	  console.log(propArray[row][col]);
+	if (this.metaLayer.hasOwnProperty("gids")) {
+	  gid = this.metaLayer.gids[row][col];
+	  props = this.getGidProperties(gid);
+	  propArray[row][col] = _.extend(propArray[row][col], props);
+	}
       }
     }
+
     this.propArray = propArray;
   }; 
 
   this.getPropArray = function () {
-    if (this.getPropArray = null)
-      this.makePropArray;
+    if (this.propArray == null)
+      this.makePropArray();
     return this.propArray;
-  }
+  };
 
   this.makeColArray = function () {
-    var colArray = [];
-    
-    if (this.metaLayer.hasOwnProperty("gids")) {
-      
-      for (var row = 0; row < this.numRows; row++) {
-	colArray[row] = [];
-	for (var col = 0; col < this.numColumns; col++) {
-	  if (this.gidHasProperty(this.metaLayer.gids[row][col], "collision"))
-	    colArray[row][col] = 1;
-	  else
-	    colArray[row][col] = 0;
-	}
-	
-      }
-      
+    var propArray = this.getPropArray();
+    var colArray = [];    
+
+    for (var row = 0; row < this.numRows; row++) {
+      colArray[row] = _.map(propArray[row], function (props) { return (props.hasOwnProperty("collision")) ? 1 : 0; });
     }
-    
+
     this.colArray = colArray;
-    return this.colArray;
   };
+
+  this.getColArray = function () {
+    if (this.colArray == null)
+      this.makeColArray();
+    return this.colArray;
+  }
 
 }
 

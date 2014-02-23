@@ -71,7 +71,7 @@ function render() {
     imageHandler.addImage(repo.get(backgrounds[1]), context, 1/6);
     imageHandler.addImage(map.getImage(0), context, map.getScale(0));
     imageHandler.addImage(map.getImage(1), context, map.getScale(1));
-    colArray = map.makeColArray();
+    colArray = map.getColArray();
     colHandler = new CollisionHandler(colArray, map.tileWidth, map.tileHeight);
     go = true;
     r1 = new Rectangle(0,0,60,60);
@@ -82,7 +82,6 @@ function render() {
     colHandler.registerObject(r2);
     colHandler.registerObject(r3);
     colHandler.registerObject(r4);
-    map.makePropArray();
   }
   if (go == true) {
     imageHandler.drawImages(cam.pos.x, cam.pos.y, cam.width, cam.height);
