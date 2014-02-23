@@ -50,7 +50,7 @@ Test.prototype.makeBlot = function () {
   var x = cam.getCenter().x - w/2;
   var y = cam.getCenter().y - h/2;
   var rect = new Drawable(x, y, w, h, "yellow");
-  rect.draw(testContext, cam, true);
+  rect.draw(context, cam);
 }
 
 Test.prototype.update = function () {
@@ -65,14 +65,12 @@ Test.prototype.update = function () {
 function render() {
   requestAnimationFrame(render);
   if (map.ready == true) {
-    grid = map.makeGrid(true, true);
+    grid = map.makeGrid(false, true);
     cam = new Camera(grid, new Vector(0, 0), cwidth, cheight, new Vector(0, 0));
     map.ready = false;
-    testCanvas = map.makeCanvas(0);
-    testContext = testCanvas.getContext("2d");
     imageHandler.addImage(repo.get(backgrounds[0]), context, 1/9);
     imageHandler.addImage(repo.get(backgrounds[1]), context, 1/6);
-    imageHandler.addImage(testCanvas, context, map.getScale(0));
+    imageHandler.addImage(map.getImage(0), context, map.getScale(0));
     imageHandler.addImage(map.getImage(1), context, map.getScale(1));
     //imageHandler.addPictures(map.getPictures(context));
     go = true;
@@ -94,8 +92,6 @@ var cam;
 var test = new Test();
 var imageHandler = new ImageHandler();
 var go = false;
-var testCanvas;
-var testContext;
 
 function init() {
   map.load();

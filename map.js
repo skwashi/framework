@@ -20,6 +20,12 @@ function Map (filename) {
 	    col: Math.floor(vector.x / this.tileWidth)};
   }
 
+  this.getTileRect = function (vector) {
+    var tc = this.getTileCoords(vector);
+    return new Rectangle(tc.col * this.tileWidth, tc.row * this.tileHeight,
+			 this.tileWidth, this.tileHeight);
+  }
+  
   this.getTileset = function (gid) {
     var i = 0;
     var id = gid & 0x0FFFFFFF; // clear the upper bits
@@ -43,7 +49,19 @@ function Map (filename) {
   this.getProperties = function(vector) {
     var row = (this.getTileCoords(vector)).row;
     var col = (this.getTileCoords(vector)).col;
-    return this.getTileProperties(this.metaLayer.gids[row][col]);
+    if (this.metaLayer.hasOwnProperty("gids"))
+      return this.getTileProperties(this.metaLayer.gids[row][col]);
+    else
+      return {};
+  }
+
+  this.hasProperty = function(vector, property, value) {
+    var props = this.getProperties(vector);
+    if (value === undefined)
+      return props.hasOwnProperty(property);
+    else
+      return (props.hasOwnProperty(property) &&
+	      props[property] == value);
   }
   
   this.load = function () {
@@ -219,7 +237,7 @@ function Map (filename) {
     var image = new Image();
     image.src = this.canvas.toDataURL();
     return image;
-  }
-  
+  }  
 
 }
+

@@ -41,7 +41,7 @@ Vector.prototype.multiply = function (a) {
 };
 
 Vector.prototype.length = function () {
-  return Math.sqrt(x*x + y*y);
+  return Math.sqrt(this.x*this.x + this.y*this.y);
 };
 
 Vector.prototype.dot = function (v) {

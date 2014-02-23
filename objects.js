@@ -33,3 +33,18 @@ function Drawable(x, y, width, height, color) {
 Drawable.prototype = Object.create(Rectangle.prototype, {
   color: {value: "black", writable: true}
 });
+
+
+function Movable(x, y, width, height, color, vel) {
+  Drawable.call(this, x, y, width, height, color)
+  this.vel = vel;
+
+  this.move = function () {
+    this.x += this.vel.x;
+    this.y += this.vel.y;
+  }
+
+}
+Movable.prototype = Object.create(Drawable.prototype, {
+  vel: {value: new Vector(0, 0), writable: true}
+});
