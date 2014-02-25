@@ -5,22 +5,39 @@ function Vector(x, y) {
   this.init = function (x, y) {
     this.x = x;
     this.y = y;
-  }
+  };
 
   this.set = function (v) {
     this.x = v.x;
     this.y = v.y;
-  }
+  };
   
   this.increase = function (v) {
     this.x += v.x;
     this.y += v.y;
-  }
+  };
 
   this.decrease = function (v) {
     this.x -= v.x;
     this.y -= v.y;
-  }
+  };
+
+  this.scale = function (a) {
+    this.x *= a;
+    this.y *= a;
+  };
+
+  this.normalize = function () {
+    var l = this.length();
+    if (l != 0) {
+      this.x /= this.length();
+      this.y /= this.length();
+    }
+  };
+
+  this.isZero = function () {
+    return (this.x == 0 && this.y == 0);
+  };
 
 }
 

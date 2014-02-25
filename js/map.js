@@ -31,7 +31,7 @@ function Map (filename) {
     return this.metaLayer[tc.row][tc.col];
   };
 
-  this.getTileRect = function (vector) {
+  this.getTileRectangle = function (vector) {
     var tc = this.getTileCoords(vector);
     return new Rectangle(tc.col * this.tileWidth, tc.row * this.tileHeight,
 			 this.tileWidth, this.tileHeight);
@@ -137,7 +137,7 @@ function Map (filename) {
 	    gids[i][j] = layer.data[this.numColumns*i + j];
 	  }
 	}
-	if (layer.name == "meta" || layer.name == "Meta")
+	if (false) //layer.name == "meta" || layer.name == "Meta")
 	  this.metaLayer.gids = gids;
 	else {
 	  if (layer.hasOwnProperty("properties") && layer["properties"].hasOwnProperty("scale"))
@@ -197,7 +197,7 @@ function Map (filename) {
   };
 
   this.makeGrid = function (openX, openY) {
-    return new Grid(this.width, this.height, openX, openY);
+    return new Grid(this.width, this.height, this.tileWidth, this.tileHeight, openX, openY);
   };
 
   this.getImage = function (n) {
@@ -217,7 +217,7 @@ function Map (filename) {
   this.getPictures = function(context) {
     var pictures = [];
     for (var i = 0; i < this.tileLayers.length; i++) {
-      pictures.push(this.getPicture(i));
+      pictures.push(this.getPicture(context, i));
     }
     return pictures;
   };
@@ -304,7 +304,7 @@ function Map (filename) {
     if (this.colArray == null)
       this.makeColArray();
     return this.colArray;
-  }
+  };
 
 }
 

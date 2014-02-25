@@ -1,108 +1,86 @@
 // coordinate system in which objects move
-function Grid(width, height, openX, openY) {
+function Grid(width, height, tileWidth, tileHeight, openX, openY) {
   this.width = width;
   this.height = height;
+  this.tileWidth = tileWidth;
+  this.tileHeight = tileHeight;
+  this.numRows = Math.floor(height / tileHeight);
+  this.numCols = Math.floor(width / tileWidth);
   this.openX = openX;
   this.openY = openY;
   
-  this.set = function (width, height, openX, openY) {
+  this.set = function (width, height, tileWidth, tileHeight, openX, openY) {
     this.width = width;
     this.height = height;
+    this.tileWidth = tileWidth;
+    this.tileHeight = tileHeight;
     this.openX = openX;
     this.openY = openY;
-  }
-
-  this.projectX = function (x) {
-    var gx = (x < 0) ? (x % this.width) + this.width : x % this.width;
-    return (gx == this.width) ? 0 : gx;
-  }
-
-  this.projectY = function (y) {
-    var gy = (y < 0) ? (y % this.height) + this.height : y % this.height;
-    return (gy == this.height) ? 0 : gy;
-  }
-  
-  this.project = function (vector) {
-    return new Vector(this.projectX(vector.x), this.projectY(vector.y));
-  }
-
-  this.projectRect = function (vector, width, height) {
-    var x = vector.x;
-    var y = vector.y;
-    
-    if (x < 0) 
-      x = (this.openX) ? (x % this.width) + this.width : 0;  
-    else if (x > this.width - width)
-      x = (this.openX) ? (x % this.width) : this.width - width;
-
-    if (y < 0) 
-      y = (this.openY) ? (y % this.height) + this.height : 0;  
-    else if (y > this.height - height)
-      y = (this.openY) ? (y % this.height) : this.height - height;
-
-    return new Vector(x, y);
-  }
-
-  this.isInside = function (vector, width, height) {
-    return vector.x >= 0 && vector.x + width <= this.width &&
-      vector.y >= 0 && vector.y + height <= this.height;
-  }
+  };
 
 }
 
+Grid.prototype.projectX = function (x) {
+  var gx = (x < 0) ? (x % this.width) + this.width : x % this.width;
+  return (gx == this.width) ? 0 : gx;
+};
 
-function Camera(grid, pos, width, height, vel) {
-  this.grid = grid;
-  this.width = width;
-  this.height = height;
-  this.pos = pos.copy();
-  this.initialPos = pos.copy();
-  this.vel = vel.copy();
-  this.initialVel = vel.copy();
+Grid.prototype.projectY = function (y) {
+  var gy = (y < 0) ? (y % this.height) + this.height : y % this.height;
+  return (gy == this.height) ? 0 : gy;
+};
+
+Grid.prototype.project = function (vector) {
+  return new Vector(this.projectX(vector.x), this.projectY(vector.y));
+};
+
+Grid.prototype.projectRectangle = function (rectangle) {
+  var x = rectangle.x;
+  var y = rectangle.y;
+  var width = rectangle.width;
+  var height = rectangle.height;
+
+  return new Rectangle(this.projectX(rectangle.x), this.projectY(rectangle.y), rectangle.width, rectangle.height);
+};
+
+Grid.prototype.isInside = function (vector, width, height) {
+  return vector.x >= 0 && vector.x + width <= this.width &&
+    vector.y >= 0 && vector.y + height <= this.height;
+};
+
+Grid.prototype.tilesIntersected = function (rectangle) {
+  var left = Math.floor(rectangle.x / this.tileWidth);
+  var right = Math.floor((rectangle.x + rectangle.width) / this.tileWidth);
+  var top = Math.floor(rectangle.y / this.tileHeight);
+  var bottom = Math.floor((rectangle.y + rectangle.height) / this.tileHeight);
   
-  this.set = function(pos, vel) {
-    this.pos.set(pos);
-    this.vel.set(vel);
-  }
-
-  this.reset = function () {
-    this.set(this.initialPos, this.initialVel);
-  }
-
-  this.getPos = function () {
-    return this.grid.project(this.pos);
-  }
-
-  this.getVel
-
-  this.getCenter = function () {
-    return new Vector(this.pos.x + (this.width-1)/2, this.pos.y + (this.height-1)/2);
-  }
-
-  this.move = function () {
-    //this.pos.increase(this.vel);
-    var x = this.pos.x += this.vel.x
-    var y = this.pos.y += this.vel.y
-
-    if (x < 0) 
-      x = (this.grid.openX) ? x : 0;  
-    else if (x > this.grid.width - this.width)
-      x = (this.grid.openX) ? x : this.grid.width - this.width;
-
-    if (y < 0) 
-      y = (this.grid.openY) ? y : 0;  
-    else if (y > this.grid.height - this.height)
-      y = (this.grid.openY) ? y : this.grid.height - this.height;
-    
-    this.pos.init(x, y);
-    //this.pos = this.grid.projectRect(this.pos, this.width, this.height);
-  }
+  var tiles = [];
   
-  this.canSee = function (rect) {
-    return (rect.x + rect.width <= this.pos.x ||
-	    rect.x <= this.pos.x + this.width ||
-	    rect.y + rect.height <= this.pos.y ||
-	    rect.y <= this.pos.y + this.height);
+  for (var row = top; row <= bottom; row++) {
+    for (var col = left; col <= right; col++) {
+      tiles.push({row: row, col: col})
+    }
   }
-  
+
+  return tiles;
+};
+
+Grid.prototype.tilesCrossed = function(startRect, endRect) {
+  return this.tilesIntersected(startRect.span(endRect));				 
+};
+
+Grid.prototype.mapTile = function (tile) {
+  var row = tile.row;
+  var col = tile.col;
+
+  if (row < 0 || row >= this.numRows) {
+    row = (row < 0) ? (row % this.numRows) + this.numRows : row % this.numRows;
+    row = (row == this.numRows) ? 0 : row;
+  }
+  if (col < 0 || col >= this.numCols) {
+    col = (col < 0) ? (col% this.numCols) + this.numCols : col % this.numCols;
+    col = (col == this.numCols) ? 0 : col;
+  }
+
+  return {row: row, col: col};
 }
