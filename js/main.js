@@ -12,9 +12,13 @@ function init() {
   var backgrounds = ["imgs/background2.png", "imgs/stars.png"];
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
+  var mCanvas = document.getElementById("messages");
+  var mContext = mCanvas.getContext("2d");
+  var messageLayer = new MessageLayer();
+  messageLayer.init(mContext, "30px Verdana");
 
   initImages(repo, imageHandler, backgrounds, context);
-  game.init(context, imageHandler);
+  game.init(context, imageHandler, messageLayer, false, false);
   game.loadMap("maps/rocks2.json");
   
   render();
@@ -30,6 +34,8 @@ function render() {
   game.update();
   // draw map top layer
   game.imageHandler.drawLayer(2, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
+  // show messages
+  game.messageLayer.render();
 }
 
 /**

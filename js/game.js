@@ -1,7 +1,8 @@
 function Game () {
-  this.init = function (context, imageHandler, openX, openY) {
+  this.init = function (context, imageHandler, messageLayer, openX, openY) {
     this.context = context;
     this.imageHandler = imageHandler;
+    this.messageLayer = messageLayer;
     this.openX = openX;
     this.openY = openY;
   };
@@ -44,8 +45,7 @@ Game.prototype.handleInput = function () {
   }
   
   if (keys["x"]) {
-    var vector = new Vector(this.grid.projectX(this.player.x), this.grid.projectY(this.player.y));
-    console.log(this.colHandler.collidesWithTile(this.player));
+    this.messageLayer.setMessage("Message!", 120);
   }
   
   this.player.move(1, dir, this.colHandler);
