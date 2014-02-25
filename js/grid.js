@@ -83,4 +83,4 @@ Grid.prototype.mapTile = function (tile) {
   }
 
   return {row: row, col: col};
-}
+};

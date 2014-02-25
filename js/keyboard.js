@@ -1,32 +1,3 @@
-/** 
- * Global variables and constants
- */
-
-/**
- * requestAnimationFrame shim by Paul Irish
- */
-window.requestAnimationFrame = (function() {
-  return window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    function(callback) {
-      window.setTimeout(callback, 1000/60);
-    };
-})();
-
-/**
- * Main drawing canvas
- */
-var canvas = document.getElementById("canvas");
-var context = canvas.getContext("2d");
-var cwidth = canvas.width;
-var cheight = canvas.height;
-
-/**
- * Keyboard handling
- */
 KEY_CODES = {
   37: "left",
   38: "up",
@@ -67,4 +38,3 @@ document.onkeyup = function(e) {
     keys[KEY_CODES[keyCode]] = false;
   }
 };
-
