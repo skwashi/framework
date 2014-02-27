@@ -8,13 +8,21 @@ function Drawable(grid, x, y, width, height, color) {
   this.setGrid = function (grid) {
     this.grid = grid;
   };
-  
-  this.addSprite = function (sprite) {
+
+  this.getCenter = function () {
+    return new Vector (this.x + (this.width-1)/2, this.y + (this.width-1)/2);
+  };
+}
+
+Drawable.prototype.addSprite = function (sprite) {
     this.sprite = sprite;
     this.hasSprite = true;    
-  };
+};
 
-}
+Drawable.prototype.getSprite = function () {
+    return this.sprite;
+};
+
     
 Drawable.prototype = Object.create(Rectangle.prototype, {
   color: {value: "black", writable: true}
@@ -31,8 +39,9 @@ Drawable.prototype.draw = function (context, cam, wrap) {
   if (wrap === undefined || wrap == false) {
     x -= cam.pos.x;
     y -= cam.pos.y;
-    if (this.hasSprite)
-      context.drawImage(this.sprite, x, y);
+    if (this.hasSprite) {
+      context.drawImage(this.getSprite(), x, y);
+    }
     else
       context.fillRect(x, y, w, h);
   } else if (wrap == true) {
@@ -46,7 +55,7 @@ Drawable.prototype.draw = function (context, cam, wrap) {
     for (var i = 0; i < rectangles.length; i++) {
       rect = rectangles[i];
       if (this.hasSprite) 
-	context.drawImage(this.sprite, this.grid.projectX(rect.x - px),
+	context.drawImage(this.getSprite(), this.grid.projectX(rect.x - px),
 			  this.grid.projectY(rect.y - py),
 			  rect.width, rect.height,
 			  rect.x, rect.y, rect.width, rect.height);
@@ -56,29 +65,31 @@ Drawable.prototype.draw = function (context, cam, wrap) {
   }
 };
 
-function Movable(grid, x, y, width, height, color, vel, force, friction) {
+function Movable(grid, x, y, width, height, color, speed, vel, force, drag) {
   Drawable.call(this, grid, x, y, width, height, color);
+  this.speed = speed;
   this.vel = vel;
 
   if (!(force === undefined))
     this.force = force;
 
-  if (!(friction === undefined))
-    this.friction = friction;
+  if (!(drag === undefined))
+    this.drag = drag;
 }
 
 Movable.prototype = Object.create(Drawable.prototype, {
+  speed: {vakue: 0, writable: true},
   vel: {value: new Vector(0, 0), writable: true}
 });
 
-Movable.prototype.move = function (dt, dir) {
-  if (!(this.force === undefined || this.friction === undefined)) {
+Movable.prototype.move = function (motionHandler, dt, dir) {
+  if (!(this.force === undefined || this.drag === undefined)) {
     if (!(dir === undefined)) {
       this.vel.x += this.force.x*dir.x*dt;
       this.vel.y += this.force.y*dir.y*dt;
     }
-    this.vel.x -= this.friction*this.vel.x*dt;
-    this.vel.y -= this.friction*this.vel.y*dt;
+    this.vel.x -= this.drag*this.vel.x*dt;
+    this.vel.y -= this.drag*this.vel.y*dt;
   }
 
   this.x += this.vel.x*dt;

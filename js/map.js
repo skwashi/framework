@@ -137,14 +137,16 @@ function Map (filename) {
 	    gids[i][j] = layer.data[this.numColumns*i + j];
 	  }
 	}
-	if (false) //layer.name == "meta" || layer.name == "Meta")
+	if (layer.name == "meta" || layer.name == "Meta") {
 	  this.metaLayer.gids = gids;
+          this.metaLayer.properties = layer.properties || {};
+        }
 	else {
 	  if (layer.hasOwnProperty("properties") && layer["properties"].hasOwnProperty("scale"))
 	    var scale = layer.properties["scale"];
 	  else
 	    var scale = 1;
-	  this.tileLayers.push({gids: gids, opacity: layer.opacity, scale: scale});
+	  this.tileLayers.push({gids: gids, opacity: layer.opacity, scale: scale, properties: (layer.properties || {})});
 	}
       }
     }
@@ -268,14 +270,18 @@ function Map (filename) {
       for (var col = 0; col < this.numColumns; col++) {
 	propArray[row][col] = {};
 	for (var i = 0, len = this.tileLayers.length; i < len; i++) {
-	  gid = this.tileLayers[i].gids[row][col]
+	  gid = this.tileLayers[i].gids[row][col];
 	  props = this.getGidProperties(gid);
-	  propArray[row][col] = _.extend(propArray[row][col], props)
+	  propArray[row][col] = _.extend(propArray[row][col], props);
+          if (this.tileLayers[i].gids[row][col] != 0)
+            propArray[row][col] = _.extend(propArray[row][col], this.tileLayers[i].properties);
 	}
 	if (this.metaLayer.hasOwnProperty("gids")) {
 	  gid = this.metaLayer.gids[row][col];
 	  props = this.getGidProperties(gid);
 	  propArray[row][col] = _.extend(propArray[row][col], props);
+          if (this.metaLayer.gids[row][col] != 0)
+            propArray[row][col] = _.extend(propArray[row][col], this.metaLayer.properties);
 	}
       }
     }
@@ -294,7 +300,9 @@ function Map (filename) {
     var colArray = [];    
 
     for (var row = 0; row < this.numRows; row++) {
-      colArray[row] = _.map(propArray[row], function (props) { return (props.hasOwnProperty("collision")) ? 1 : 0; });
+      colArray[row] = _.map(propArray[row], function (props) {
+        return (props.hasOwnProperty("collision") || props.hasOwnProperty("solid")) ? 1 : 0; 
+      });
     }
 
     this.colArray = colArray;

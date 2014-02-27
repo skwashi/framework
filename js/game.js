@@ -1,15 +1,17 @@
 function Game () {
-  this.init = function (context, imageHandler, messageLayer, openX, openY) {
+  this.init = function (context, imageHandler, messageLayer, imageRepo, openX, openY) {
     this.context = context;
     this.imageHandler = imageHandler;
     this.messageLayer = messageLayer;
+    this.imageRepo = imageRepo;
     this.openX = openX;
     this.openY = openY;
+    this.time = Date.now();
   };
 }
 
-Game.prototype.handleInput = function () {
-  var move = 5;
+Game.prototype.handleInput = function (dt) {
+  var move = 5 * 60;
   var dir = new Vector(0,0);
 
   if (keys["e"])
@@ -43,12 +45,25 @@ Game.prototype.handleInput = function () {
   if (keys["d"]) {
     dir.x += 1;
   }
+
+  if (keys["space"]) {
+    this.motionHandler.jump(this.player);
+  }
+
+  if (keys["z"])
+    this.cam.centerOn(this.player, dt);
   
   if (keys["x"]) {
-    this.messageLayer.setMessage("Message!", 120);
+    if (this.cam.followObject == null)
+      this.cam.follow(this.player, true, true, 1/5, 1/4);
+    else
+      this.cam.unFollow();
   }
+
+  if (keys["q"])
+    this.motionHandler.unstuck(this.player);
   
-  this.player.move(1, dir, this.colHandler);
+  this.player.move(this.motionHandler, dt, dir);
 };
 
 Game.prototype.frameReset = function () {
@@ -74,9 +89,14 @@ Game.prototype.makeBlot = function () {
 };
 
 Game.prototype.update = function () {
+  var now = Date.now();
+  var dt = (now - this.time)/1000;
+
+  this.time = now;
+
   this.frameReset();
-  this.handleInput();
-  this.cam.move();
+  this.handleInput(dt);
+  this.cam.move(dt);
   if (this.cam.canSee(this.player))
     this.player.draw(this.context, this.cam);
   this.drawCrosshair();
@@ -92,12 +112,41 @@ Game.prototype.loadMap = function (filename) {
     that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
     that.player = new Player(that.grid, that.cam.pos.x + that.cam.width/2 - 10, 
-                             that.cam.pos.y + that.cam.height - 40, 20, 40, "blue", 
-                             new Vector(0, 0), new Vector(1,1), 0.1);
+                             that.cam.pos.y + that.cam.height - 40, 20, 40, "blue", 800,
+                             new Vector(0, 0), new Vector(3200, 3200), 60/10, 1000);
     that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 1);
     that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 2);
-    that.imageHandler.addImage(that.map.getImage(2), that.context, that.map.getScale(2), 1);
-    that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);  
+    that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
+    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");
+    /*
+    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "side");
+    that.motionHandler.setGravity(1600);
+    that.motionHandler.setFriction(60/10);
+     */
+    that.loadPlayerSprites(5, 45);
+    that.time = Date.now();
   }, 2000);
   
+};
+
+
+Game.prototype.loadPlayerSprites = function (inc, max) {
+  
+  var filename = "imgs/ship.png";
+  this.imageRepo.load(filename);
+  this.player.addSprite(this.imageRepo.get(filename), 0);
+  this.player.width = this.imageRepo.get(filename).width;
+  this.player.height = this.imageRepo.get(filename).height;
+
+  for (var i = inc; i <= max; i += inc) {
+    filename = "imgs/shipr"+i+".png";
+    this.imageRepo.load(filename);
+    this.player.addSprite(this.imageRepo.get(filename), i);
+    filename = "imgs/shipl"+i+".png";
+    this.imageRepo.load(filename);
+    this.player.addSprite(this.imageRepo.get(filename), -i);
+  }
+  this.player.angleInc = inc;
+  this.player.angleMax = max;
+ 
 };

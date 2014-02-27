@@ -1,48 +1,55 @@
-function Player(grid, x, y, width, height, color, vel, force, friction) {
-  Movable.call(this, grid, x, y, width, height, color, vel, force, friction);
+function Player(grid, x, y, width, height, color, speed, vel, force, drag, boost) {
+  Movable.call(this, grid, x, y, width, height, color, speed, vel, force, drag);
+  this.boost = boost;
+  this.sprites = {};
+
+  this.angle = 0;
+  this.angleInc = 5;
+  this.angleMax = 45;
+  
 }
-Player.prototype = Object.create(Movable.prototype);
+Player.prototype = Object.create(Movable.prototype, {
+  boost: {value: 0, writable: true}
+});
 
-Player.prototype.move = function (dt, dir, ch) {
-  var oldpos = new Vector(this.x, this.y);
+
+Player.prototype.addSprite = function (sprite, angle) {
+  this.hasSprite = true;
+  if (angle == 0) {
+    this.sprite = sprite;
+    var shadow = document.createElement("canvas");
+    shadow.width = sprite.width;
+    shadow.height = sprite.height;
+    this.shadowContext = shadow.getContext("2d");    
+  }
+  this.sprites[angle] = sprite;
+};
+
+Player.prototype.getSprite = function () {
+  var angle = Math.floor(this.angle/this.angleInc) * this.angleInc;
+  var sprite = this.sprites[angle];
+  if (typeof(sprite) === "undefined") {
+    return this.sprite;
+  }
+  else {
+    return sprite;
+  }
+};
+
+Player.prototype.move = function (motionHandler, dt, dir) {
+  var sign = (this.angle == 0) ? 0 : ((this.angle > 0) ? 1 : -1);
+  var inc = 4;
   
-  Movable.prototype.move.call(this, dt, dir);
+  if (sign*this.angle < inc)
+    this.angle = 0;
+  else
+    this.angle -= inc*sign;
 
-  var newpos = new Vector(this.x, this.y);
-  var d = newpos.subtract(oldpos);
+  this.angle += (5+inc)*dir.x;
 
-  if (ch.collidesWithTile({x: oldpos.x + d.x, y: oldpos.y, width: this.width, height: this.height})) {
-    newpos.x = oldpos.x;
-    this.vel.x = 0;//- this.vel.x;
-  }
+  if (this.angle*sign > this.angleMax)
+    this.angle = sign*this.angleMax;
 
-  if (ch.collidesWithTile({x: oldpos.x, y: oldpos.y + d.y, width: this.width, height: this.height})) {
-    newpos.y = oldpos.y;
-    this.vel.y = 0;//- this.vel.y;
-  }
-
-  var x = newpos.x; 
-  var y = newpos.y;
-  
-  if (x < 0 && ! this.grid.openX) {
-    this.vel.x = 0;
-    x : 0;
-  }
-  else if (x > this.grid.width - this.width && !this.grid.openX) {
-    x = this.grid.width - this.width;
-    this.vel.x = 0;
-  }
-  
-  if (y < 0 && !this.grid.openY) {
-    y = 0;  
-    this.vel.y = 0;
-  }
-  else if (y > this.grid.height - this.height && ! this.grid.openY) {
-    this.vel.y = 0;
-    y = this.grid.height - this.height;
-  }
-
-  this.x = x;
-  this.y = y;
+  motionHandler.move(this, dt, dir);
 
 };

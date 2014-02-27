@@ -17,13 +17,17 @@ function CollisionHandler (grid, colArray, tileWidth, tileHeight) {
 
 CollisionHandler.prototype.collidesWithTile = function (rectangle) {
   var tiles = this.grid.tilesIntersected(rectangle);
-
   return _.some(tiles, function (tile) {
     var mt = this.grid.mapTile(tile);
     return (this.colArray[mt.row][mt.col] == 1);
   }, this);
 
 };
+
+CollisionHandler.prototype.onGround = function (rectangle) {
+  return this.collidesWithTile({x: rectangle.x, y: rectangle.y + rectangle.height, width: rectangle.width, height: 2});
+};
+
 
 CollisionHandler.prototype.registerObject = function (object) {
   var tiles = this.grid.tilesIntersected(object);
