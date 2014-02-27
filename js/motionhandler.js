@@ -44,22 +44,20 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   else if (this.type == "side") {
     
     vy += this.gravity * dt;
-    
+
     if (this.colHandler.onGround(object)) {
       vx -= vx * Math.min(1, this.friction * dt);
-    }
-    
+    } else
+      vx -= vx * Math.min(1, object.drag*dt);
+
+        
     if (!(object.force === undefined || dir === undefined)) {
       if (vx * dir.x / (Math.abs(dir.x) || 1) <= object.speed)
         vx += object.force.x * dir.x * dt;
       else
         vx = (vx > 0) ? object.speed : -object.speed;
-      if (vy * dir.y / (Math.abs(dir.y) || 1) <= object.speed)
-        vy += object.force.y * dir.y * dt;
-      else
-        vy = (vy > 0) ? object.speed : -object.speed;
     }
-
+    
   }
   
   else if (this.type == "space") {
@@ -131,9 +129,11 @@ MotionHandler.prototype.move = function (object, dt, dir) {
 };
 
 
-MotionHandler.prototype.jump = function (object) {
-  if (this.colHandler.onGround(object))
+MotionHandler.prototype.jump = function (object, dir) {
+  if (this.colHandler.onGround(object)) {
     object.vel.y = -object.boost;
+    //object.vel.x = object.boost*dir.x;
+  }
 };
 
 

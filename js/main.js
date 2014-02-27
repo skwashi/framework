@@ -18,10 +18,12 @@ function init() {
   messageLayer.init(mContext, "30px Verdana");
 
   initImages(repo, imageHandler, backgrounds, context);
-  game.init(context, imageHandler, messageLayer, repo, false, false);
-  game.loadMap("maps/rocks2.json");
+  game.init(context, imageHandler, messageLayer, repo, false, true);
   
-  render();
+  //game.loadMap("maps/rocks2.json");
+  game.loadMap("maps/platforms.json");
+
+  setTimeout(render, 2000);
 }
 
 function render() {

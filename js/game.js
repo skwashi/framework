@@ -47,7 +47,7 @@ Game.prototype.handleInput = function (dt) {
   }
 
   if (keys["space"]) {
-    this.motionHandler.jump(this.player);
+    this.motionHandler.jump(this.player, dir);
   }
 
   if (keys["z"])
@@ -106,23 +106,28 @@ Game.prototype.update = function () {
 Game.prototype.loadMap = function (filename) {
   this.map = new Map(filename);
   this.map.load();
+  var sprite = this.imageRepo.load("imgs/ship.png");
   var that = this;
   setTimeout(function () {
     that.grid = that.map.makeGrid(that.openX, that.openY);
     that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
-    that.player = new Player(that.grid, that.cam.pos.x + that.cam.width/2 - 10, 
-                             that.cam.pos.y + that.cam.height - 40, 20, 40, "blue", 800,
-                             new Vector(0, 0), new Vector(3200, 3200), 60/10, 1000);
+
+    that.player = new Player(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
+                             that.cam.pos.y + that.cam.height - sprite.height, sprite.width, sprite.height, "blue", 800,
+                             new Vector(0, 0), new Vector(3200, 3200), 60/10, 800);
+    that.player.addSprite(sprite, 0);
+
     that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 1);
     that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 2);
+    
     that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
-    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");
-    /*
+    
+    //that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");   
     that.motionHandler = new MotionHandler(that.grid, that.colHandler, "side");
     that.motionHandler.setGravity(1600);
     that.motionHandler.setFriction(60/10);
-     */
+    
     that.loadPlayerSprites(5, 45);
     that.time = Date.now();
   }, 2000);
@@ -131,13 +136,7 @@ Game.prototype.loadMap = function (filename) {
 
 
 Game.prototype.loadPlayerSprites = function (inc, max) {
-  
-  var filename = "imgs/ship.png";
-  this.imageRepo.load(filename);
-  this.player.addSprite(this.imageRepo.get(filename), 0);
-  this.player.width = this.imageRepo.get(filename).width;
-  this.player.height = this.imageRepo.get(filename).height;
-
+  var filename;
   for (var i = inc; i <= max; i += inc) {
     filename = "imgs/shipr"+i+".png";
     this.imageRepo.load(filename);
@@ -148,5 +147,5 @@ Game.prototype.loadPlayerSprites = function (inc, max) {
   }
   this.player.angleInc = inc;
   this.player.angleMax = max;
- 
+
 };

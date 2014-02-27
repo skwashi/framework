@@ -14,6 +14,14 @@ function Drawable(grid, x, y, width, height, color) {
   };
 }
 
+Drawable.prototype.reset = function (x, y, width, height, color) {
+  this.x = x || this.x;
+  this.y = y || this.y;
+  this.width = width || this.width;
+  this.height = height || this.height;
+  this.color = color || this.color;
+};
+
 Drawable.prototype.addSprite = function (sprite) {
     this.sprite = sprite;
     this.hasSprite = true;    
