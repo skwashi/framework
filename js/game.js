@@ -7,6 +7,10 @@ function Game () {
     this.openX = openX;
     this.openY = openY;
     this.time = Date.now();
+    this.campos = null;
+
+    this.toggleCooldown = 1;
+    this.cooldowns = {follow: 0, lock: 0};
   };
 }
 
@@ -61,7 +65,7 @@ Game.prototype.handleInput = function (dt) {
     this.messageHandler.setMessage("Finding player!", 120);
   }
   
-  if (keys["x"]) {
+  if (keys["x"] && this.cooldowns.follow <= 0) {
     if (this.cam.followObject == null) {
       this.messageHandler.setMessage("Following player!", 120);
       this.cam.follow(this.player, true, true, 1/3, 1/4);
@@ -69,9 +73,10 @@ Game.prototype.handleInput = function (dt) {
       this.cam.unFollow();
       this.messageHandler.setMessage("Not following player!", 120);
     }
+    this.cooldowns.follow = this.toggleCooldown;
   }
   
-  if (keys["r"]) {
+  if (keys["r"] && this.cooldowns.lock <= 0) {
     if (this.player.camLocked == false) {
       this.messageHandler.setMessage("Player locked to camera!", 120);
       this.player.camLock(this.cam);
@@ -79,6 +84,7 @@ Game.prototype.handleInput = function (dt) {
       this.player.camLocked = false;
       this.messageHandler.setMessage("Player not locked to camera!", 120);
     }
+    this.cooldowns.lock = this.toggleCooldown;
   }
   
   if (keys["q"])
@@ -101,29 +107,47 @@ Game.prototype.drawCrosshair = function () {
   this.context.strokeRect(x,y,w,h);
 };
 
-Game.prototype.makeBlot = function () {
-  var w = 21;
-  var h = 21;
-  var x = this.cam.getCenter().x - w/2;
-  var y = this.cam.getCenter().y - h/2;
-  var rect = new Drawable(x, y, w, h, "yellow");
-  rect.draw(this.context, this.cam);
+Game.prototype.lowerCooldowns = function (dt) {
+  for (key in this.cooldowns) {
+    this.cooldowns[key] = Math.max(0, this.cooldowns[key] - dt);
+  }
 };
 
 Game.prototype.update = function () {
   var now = Date.now();
   var dt = (now - this.time)/1000;
-
   this.time = now;
 
+  this.lowerCooldowns(dt);
   this.frameReset();
   this.handleInput(dt);
 };
 
 Game.prototype.draw = function () {
-  if (this.cam.canSee(this.player))
+  var camMoved = (this.campos == null) || ! this.cam.pos.equals(this.campos);
+
+  if (this.campos == null)
+    this.campos = this.cam.pos.copy();
+  else
+    this.campos.set(this.cam.pos);
+  
+  // draw starry backgrounds
+  this.imageHandler.drawLayer(-1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
+  // draw map background
+  this.imageHandler.drawLayer(0, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
+
+  // update and draw objects
+  
+  if (this.cam.canSee(this.player)) {
     this.player.draw(this.context, this.cam);
+  }
   this.drawCrosshair();
+
+  // draw overlayer
+  this.imageHandler.drawLayer(1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
+
+  // show messages
+  this.messageHandler.render();
 };
 
 Game.prototype.loadMap = function (filename) {
@@ -137,13 +161,16 @@ Game.prototype.loadMap = function (filename) {
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
 
     that.player = new FreePlayer(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
-                             that.cam.pos.y + that.cam.height - sprite.height, sprite.width, sprite.height, "blue", 800,
+                             that.cam.pos.y + that.cam.height - sprite.height - 70, sprite.width, sprite.height, "blue", 800,
                              new Vector(0, 0), new Vector(3200, 3200), 60/10, 800);
     that.player.addSprite(sprite, 0);
 
-    that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 1);
-    that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 2);
-    
+    /*
+    that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 0);
+    that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 1);
+    */
+    that.map.loadImages(that.imageHandler, that.context);
+
     that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
     
     that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");   

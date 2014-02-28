@@ -109,8 +109,8 @@ FreePlayer.prototype.draw = function (context, cam) {
   var w = this.width;
   var h = this.height;
   
-  context.fillStyle = this.color;
-  
+  context.fillStyle = this.color;  
+
   x -= cam.pos.x;
   y -= cam.pos.y;
   if (this.hasSprite) {

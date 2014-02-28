@@ -18,7 +18,8 @@
          "opacity":0.479999989271164,
          "properties":
             {
-             "scale":"1.5"
+             "scale":"1.5",
+             "level":"1"
             },
          "type":"tilelayer",
          "visible":true,

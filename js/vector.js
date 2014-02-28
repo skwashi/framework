@@ -41,6 +41,10 @@ function Vector(x, y) {
 
 }
 
+Vector.prototype.equals = function (v) {
+  return this.x == v.x && this.y == v.y;
+};
+
 Vector.prototype.copy = function () {
   return new Vector(this.x, this.y);
 };

@@ -1,7 +1,7 @@
-function initImages (repo, imageHandler, backgrounds, context) {
+function initBackgrounds (repo, imageHandler, backgrounds, context) {
   repo.loadArray(backgrounds);
-  imageHandler.addImage(repo.get(backgrounds[0]), context, 1/9, 0);
-  imageHandler.addImage(repo.get(backgrounds[1]), context, 1/6, 0);
+  imageHandler.addImage(repo.get(backgrounds[0]), context, 1/9, -1);
+  imageHandler.addImage(repo.get(backgrounds[1]), context, 1/6, -1);
 }
 
 var game = new Game();
@@ -10,17 +10,21 @@ function init() {
   var imageHandler = new ImageHandler();
   var repo = new ImageRepo();
   var backgrounds = ["imgs/background2.png", "imgs/stars.png"];
+//  var bgCanvas = document.getElementById("background");
+//  var bgContext = bgCanvas.getContext("2d");
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
+//  var overCanvas = document.getElementById("over");
+//  var overContext = overCanvas.getContext("2d"); 
   var mCanvas = document.getElementById("messages");
   var mContext = mCanvas.getContext("2d");
   var messageHandler = new MessageHandler();
   messageHandler.init(mContext, "30px Verdana");
-
-  initImages(repo, imageHandler, backgrounds, context);
+  
+  initBackgrounds(repo, imageHandler, backgrounds, context);
   game.init(context, imageHandler, messageHandler, repo, true, true);
   
-  game.loadMap("maps/rocks2.json");
+  game.loadMap("maps/platforms.json");
   //game.loadMap("maps/platforms.json");
 
   setTimeout(render, 2000);
@@ -29,17 +33,10 @@ function init() {
 function render() {
   requestAnimationFrame(render);
   game.update();
-  //game.context.clearRect(0,0,game.context.canvas.width, game.context.canvas.height);
-  // draw starry backgrounds
-  game.imageHandler.drawLayer(0, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
-  // draw map background
-  game.imageHandler.drawLayer(1, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
-  // update and draw objects
+  game.update();
+  game.update();
+  game.update();
   game.draw();
-  // draw map top layer
-  game.imageHandler.drawLayer(2, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
-  // show messages
-  game.messageHandler.render();
 }
 
 /**

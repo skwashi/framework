@@ -30,12 +30,6 @@ function Map (filename) {
     var tc = this.getTileCoords(vector);
     return this.metaLayer[tc.row][tc.col];
   };
-
-  this.getTileRectangle = function (vector) {
-    var tc = this.getTileCoords(vector);
-    return new Rectangle(tc.col * this.tileWidth, tc.row * this.tileHeight,
-			 this.tileWidth, this.tileHeight);
-  };
   
   this.getTileset = function (gid) {
     var i = 0;
@@ -146,7 +140,12 @@ function Map (filename) {
 	    var scale = layer.properties["scale"];
 	  else
 	    var scale = 1;
-	  this.tileLayers.push({gids: gids, opacity: layer.opacity, scale: scale, properties: (layer.properties || {})});
+          if (layer.hasOwnProperty("properties") && layer["properties"].hasOwnProperty("level"))
+            var level = layer.properties["level"];
+          else
+            var level = 0;
+	  this.tileLayers.push({gids: gids, opacity: layer.opacity, scale: scale, level: level,
+                                properties: (layer.properties || {})});
 	}
       }
     }
@@ -316,3 +315,8 @@ function Map (filename) {
 
 }
 
+Map.prototype.loadImages = function (imageHandler, context) {
+  _.forEach(this.tileLayers, function (layer) {
+    imageHandler.addImage(layer.image, context, layer.scale, layer.level);
+  });
+};

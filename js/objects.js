@@ -36,6 +36,10 @@ Drawable.prototype = Object.create(Rectangle.prototype, {
   color: {value: "black", writable: true}
 });
 
+Drawable.prototype.clear = function (context, cam) {
+  context.clearRect(this.x - cam.pos.x, this.y - cam.pos.y, this.width, this.height);
+};
+
 Drawable.prototype.draw = function (context, cam, wrap) {
   var x = this.x;
   var y = this.y;

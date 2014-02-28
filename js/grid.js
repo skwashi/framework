@@ -69,6 +69,11 @@ Grid.prototype.tilesCrossed = function(startRect, endRect) {
   return this.tilesIntersected(startRect.span(endRect));				 
 };
 
+Grid.prototype.tileCoords = function (vector) {
+  return {row: Math.floor(vector.y / this.tileHeight), 
+	  col: Math.floor(vector.x / this.tileWidth)};
+};
+
 Grid.prototype.mapTile = function (tile) {
   var row = tile.row;
   var col = tile.col;
