@@ -7,6 +7,8 @@ function Camera(grid, pos, width, height, vel) {
   this.vel = vel.copy();
   this.initialVel = vel.copy();
   
+  this.baseVel = vel.copy();
+
   this.followObject = null;
   this.folX = false;
   this.folY = false;

@@ -78,6 +78,10 @@ function Movable(grid, x, y, width, height, color, speed, vel, force, drag) {
   this.speed = speed;
   this.vel = vel;
 
+  this.gridLocked = false;
+  this.camLocked = false;
+  this.cam = null;
+
   if (!(force === undefined))
     this.force = force;
 
@@ -103,4 +107,53 @@ Movable.prototype.move = function (motionHandler, dt, dir) {
   this.x += this.vel.x*dt;
   this.y += this.vel.y*dt;
 
+  if (this.gridLocked)
+    this.adjustToGrid();
+
+  if (this.camLocked)
+    this.adjustToCam(this.cam);
 };
+
+Movable.prototype.gridLock = function () {
+  this.gridLocked = true;
+};
+
+Movable.prototype.camLock = function (cam) {
+  this.camLocked = true;
+  this.cam = cam;
+};
+
+Movable.prototype.adjustToRectangle = function (rect) {
+  if (this.x < rect.x)
+    this.x = rect.x;
+  else if (this.x + this.width > rect.x + rect.width)
+    this.x = rect.x + rect.width - this.width;
+  
+  if (this.y < rect.y)
+    this.y = rect.y;
+  else if (this.y + this.height > rect.y + rect.height)
+    this.y = rect.y + rect.height - this.height;  
+};
+
+Movable.prototype.adjustToGrid = function () {
+  if (this.x < 0 && ! this.grid.openX) {
+    this.x = 0;
+    this.vel.x = 0;
+  } else if (this.x + this.width > this.grid.width && !this.grid.openX) {
+    this.x = this.grid.width - this.width;
+    this.vel.x = 0;
+  }
+  
+  if (this.y < 0 && !this.grid.openY) {
+    this.y = 0;  
+    this.vel.y = 0;
+  } else if (this.y + this.height > this.grid.height && ! this.grid.openY) {
+    this.y = this.grid.height - this.height;
+    this.vel.y = 0;
+  }
+};
+
+Movable.prototype.adjustToCam = function (cam) {
+  this.adjustToRectangle({x: cam.pos.x, y: cam.pos.y, width: cam.width, height: cam.height});
+};
+

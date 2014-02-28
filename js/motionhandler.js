@@ -81,7 +81,6 @@ MotionHandler.prototype.move = function (object, dt, dir) {
     
   }
 
-
   newpos = new Vector (oldpos.x + vx * dt, oldpos.y + vy * dt);
 
   // check for collision with solid tiles
@@ -98,33 +97,10 @@ MotionHandler.prototype.move = function (object, dt, dir) {
     vy = 0;
   }
 
-  // check for grid borders
-
-  var x = newpos.x; 
-  var y = newpos.y;
-  
-  if (x < 0 && ! this.grid.openX) {
-    x = 0;
-    vx = 0;
-  }
-  else if (x > this.grid.width - object.width && !this.grid.openX) {
-    x = this.grid.width - object.width;
-    vx = 0;
-  }
-  
-  if (y < 0 && !this.grid.openY) {
-    y = 0;  
-    vy = 0;
-  }
-  else if (y > this.grid.height - object.height && ! this.grid.openY) {
-    vy = 0;
-    y = this.grid.height - object.height;
-  }
-
+  object.x = newpos.x; 
+  object.y = newpos.y;
   object.vel.x = vx;
   object.vel.y = vy;
-  object.x = x;
-  object.y = y;
 
 };
 

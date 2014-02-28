@@ -1,8 +1,8 @@
 function Game () {
-  this.init = function (context, imageHandler, messageLayer, imageRepo, openX, openY) {
+  this.init = function (context, imageHandler, messageHandler, imageRepo, openX, openY) {
     this.context = context;
     this.imageHandler = imageHandler;
-    this.messageLayer = messageLayer;
+    this.messageHandler = messageHandler;
     this.imageRepo = imageRepo;
     this.openX = openX;
     this.openY = openY;
@@ -14,6 +14,12 @@ Game.prototype.handleInput = function (dt) {
   var move = 5 * 60;
   var dir = new Vector(0,0);
 
+  if (keys["i"])
+    this.cam.baseVel.y -= 60;
+
+  if (keys["k"])
+    this.cam.baseVel.y += 60;
+
   if (keys["e"])
     move *= 2;
 
@@ -21,16 +27,16 @@ Game.prototype.handleInput = function (dt) {
     move /= 2;
 
   if (keys["left"]) {
-    this.cam.vel.x -= move;
+    this.cam.pos.x -= move*dt;
   }
   if (keys["up"]) {
-    this.cam.vel.y -= move;
+    this.cam.pos.y -= move*dt;
   }
   if (keys["right"]) {
-    this.cam.vel.x += move;
+    this.cam.pos.x += move*dt;
   }  
   if (keys["down"]) {
-    this.cam.vel.y += move;
+    this.cam.pos.y += move*dt;
   }
 
   if (keys["a"]) {
@@ -50,24 +56,40 @@ Game.prototype.handleInput = function (dt) {
     this.motionHandler.jump(this.player, dir);
   }
 
-  if (keys["z"])
+  if (keys["z"]) {
     this.cam.centerOn(this.player, dt);
+    this.messageHandler.setMessage("Finding player!", 120);
+  }
   
   if (keys["x"]) {
-    if (this.cam.followObject == null)
-      this.cam.follow(this.player, true, true, 1/5, 1/4);
-    else
+    if (this.cam.followObject == null) {
+      this.messageHandler.setMessage("Following player!", 120);
+      this.cam.follow(this.player, true, false, 1/5, 1/4);
+    } else {
       this.cam.unFollow();
+      this.messageHandler.setMessage("Not following player!", 120);
+    }
   }
-
+  
+  if (keys["r"]) {
+    if (this.player.camLocked == false) {
+      this.messageHandler.setMessage("Player locked to camera!", 120);
+      this.player.camLock(this.cam);
+    } else {
+      this.player.camLocked = false;
+      this.messageHandler.setMessage("Player not locked to camera!", 120);
+    }
+  }
+  
   if (keys["q"])
     this.motionHandler.unstuck(this.player);
   
+  this.cam.move(dt);
   this.player.move(this.motionHandler, dt, dir);
 };
 
 Game.prototype.frameReset = function () {
-  this.cam.vel.init(0, 0);
+  this.cam.vel.set(this.cam.baseVel);
 };
 
 Game.prototype.drawCrosshair = function () {
@@ -96,7 +118,6 @@ Game.prototype.update = function () {
 
   this.frameReset();
   this.handleInput(dt);
-  this.cam.move(dt);
   if (this.cam.canSee(this.player))
     this.player.draw(this.context, this.cam);
   this.drawCrosshair();
@@ -123,10 +144,10 @@ Game.prototype.loadMap = function (filename) {
     
     that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
     
-    //that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");   
-    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "side");
-    that.motionHandler.setGravity(1600);
-    that.motionHandler.setFriction(60/10);
+    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");   
+    //that.motionHandler = new MotionHandler(that.grid, that.colHandler, "side");
+    //that.motionHandler.setGravity(1600);
+    //that.motionHandler.setFriction(60/10);
     
     that.loadPlayerSprites(5, 45);
     that.time = Date.now();

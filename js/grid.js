@@ -58,7 +58,7 @@ Grid.prototype.tilesIntersected = function (rectangle) {
   
   for (var row = top; row <= bottom; row++) {
     for (var col = left; col <= right; col++) {
-      tiles.push({row: row, col: col})
+      tiles.push({row: row, col: col});
     }
   }
 

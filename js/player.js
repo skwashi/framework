@@ -2,6 +2,8 @@ function Player(grid, x, y, width, height, color, speed, vel, force, drag, boost
   Movable.call(this, grid, x, y, width, height, color, speed, vel, force, drag);
   this.boost = boost;
   this.sprites = {};
+  
+  this.gridLocked = true;
 
   this.angle = 0;
   this.angleInc = 5;
@@ -49,7 +51,19 @@ Player.prototype.move = function (motionHandler, dt, dir) {
 
   if (this.angle*sign > this.angleMax)
     this.angle = sign*this.angleMax;
-
+  
+  if (this.camLocked) {
+    if (!this.cam.folX)
+      this.x += this.cam.vel.x * dt;
+    if (!this.cam.folY)
+      this.y += this.cam.vel.y * dt;
+  }
   motionHandler.move(this, dt, dir);
 
+  if (this.gridLocked)
+    this.adjustToGrid();
+
+  if (this.camLocked) {
+    this.adjustToCam(this.cam);
+  }
 };
