@@ -29,6 +29,7 @@ function init() {
 function render() {
   requestAnimationFrame(render);
   game.update();
+  //game.context.clearRect(0,0,game.context.canvas.width, game.context.canvas.height);
   // draw starry backgrounds
   game.imageHandler.drawLayer(0, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
   // draw map background

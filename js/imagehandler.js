@@ -63,10 +63,10 @@ ImageHandler.prototype.drawImage = function(picture, xOrigin, yOrigin, width, he
   var bottom = image.height;
   var right = image.width;
 
-  var x = (xOrigin < 0) ? 
-	((scale*xOrigin) % right) + right : (scale*xOrigin) % right;
-  var y = (yOrigin < 0) ? 
-	((scale*yOrigin) % bottom) + bottom : (scale*yOrigin) % bottom;
+  var x = Math.round((xOrigin < 0) ? 
+	((scale*xOrigin) % right) + right : (scale*xOrigin) % right);
+  var y = Math.round((yOrigin < 0) ? 
+	((scale*yOrigin) % bottom) + bottom : (scale*yOrigin) % bottom);
   
   if (x == right)
     x = 0;

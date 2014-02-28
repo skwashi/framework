@@ -48,10 +48,10 @@ Drawable.prototype.draw = function (context, cam, wrap) {
     x -= cam.pos.x;
     y -= cam.pos.y;
     if (this.hasSprite) {
-      context.drawImage(this.getSprite(), x, y);
+      context.drawImage(this.getSprite(), Math.round(x), Math.round(y));
     }
     else
-      context.fillRect(x, y, w, h);
+      context.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
   } else if (wrap == true) {
     var right = context.canvas.width;
     var bottom = context.canvas.height;
@@ -63,12 +63,12 @@ Drawable.prototype.draw = function (context, cam, wrap) {
     for (var i = 0; i < rectangles.length; i++) {
       rect = rectangles[i];
       if (this.hasSprite) 
-	context.drawImage(this.getSprite(), this.grid.projectX(rect.x - px),
-			  this.grid.projectY(rect.y - py),
-			  rect.width, rect.height,
-			  rect.x, rect.y, rect.width, rect.height);
+	context.drawImage(this.getSprite(), Math.round(this.grid.projectX(rect.x - px)),
+			  Math.round(this.grid.projectY(rect.y - py)),
+			  Math.round(rect.width), Math.round(rect.height),
+			  Math.round(rect.x), Math.round(rect.y), Math.round(rect.width), Math.round(rect.height));
       else
-	context.fillRect(rect.x, rect.y, rect.width, rect.height);
+	context.fillRect(Math.round(rect.x), Math.round(rect.y), Math.round(rect.width), Math.round(rect.height));
     }
   }
 };
