@@ -136,7 +136,7 @@ Movable.prototype.adjustToRectangle = function (rect) {
 };
 
 Movable.prototype.adjustToGrid = function () {
-  if (this.x < 0 && ! this.grid.openX) {
+  if (this.x < 0 && !this.grid.openX) {
     this.x = 0;
     this.vel.x = 0;
   } else if (this.x + this.width > this.grid.width && !this.grid.openX) {

@@ -18,7 +18,7 @@ function init() {
   messageHandler.init(mContext, "30px Verdana");
 
   initImages(repo, imageHandler, backgrounds, context);
-  game.init(context, imageHandler, messageHandler, repo, false, true);
+  game.init(context, imageHandler, messageHandler, repo, true, true);
   
   game.loadMap("maps/rocks2.json");
   //game.loadMap("maps/platforms.json");

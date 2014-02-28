@@ -64,7 +64,7 @@ Game.prototype.handleInput = function (dt) {
   if (keys["x"]) {
     if (this.cam.followObject == null) {
       this.messageHandler.setMessage("Following player!", 120);
-      this.cam.follow(this.player, true, false, 1/5, 1/4);
+      this.cam.follow(this.player, true, true, 1/3, 1/4);
     } else {
       this.cam.unFollow();
       this.messageHandler.setMessage("Not following player!", 120);
@@ -136,7 +136,7 @@ Game.prototype.loadMap = function (filename) {
     that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
 
-    that.player = new Player(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
+    that.player = new FreePlayer(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
                              that.cam.pos.y + that.cam.height - sprite.height, sprite.width, sprite.height, "blue", 800,
                              new Vector(0, 0), new Vector(3200, 3200), 60/10, 800);
     that.player.addSprite(sprite, 0);
@@ -151,7 +151,7 @@ Game.prototype.loadMap = function (filename) {
     //that.motionHandler.setGravity(1600);
     //that.motionHandler.setFriction(60/10);
     
-    that.loadPlayerSprites(5, 45);
+    //that.loadPlayerSprites(5, 45);
     that.time = Date.now();
   }, 2000);
   
