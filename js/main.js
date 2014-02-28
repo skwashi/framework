@@ -28,12 +28,13 @@ function init() {
 
 function render() {
   requestAnimationFrame(render);
+  game.update();
   // draw starry backgrounds
   game.imageHandler.drawLayer(0, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
   // draw map background
   game.imageHandler.drawLayer(1, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
   // update and draw objects
-  game.update();
+  game.draw();
   // draw map top layer
   game.imageHandler.drawLayer(2, game.cam.pos.x, game.cam.pos.y, game.cam.width, game.cam.height);
   // show messages

@@ -118,11 +118,13 @@ Game.prototype.update = function () {
 
   this.frameReset();
   this.handleInput(dt);
+};
+
+Game.prototype.draw = function () {
   if (this.cam.canSee(this.player))
     this.player.draw(this.context, this.cam);
   this.drawCrosshair();
 };
-
 
 Game.prototype.loadMap = function (filename) {
   this.map = new Map(filename);
