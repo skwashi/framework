@@ -24,8 +24,8 @@ function init() {
   initBackgrounds(repo, imageHandler, backgrounds, context);
   game.init(context, imageHandler, messageHandler, repo, true, true);
   
-  game.loadMap("maps/rocks2.json");
-  //game.loadMap("maps/platforms.json");
+  //game.loadMap("maps/rocks2.json");
+  game.loadMap("maps/platforms.json");
 
   setTimeout(render, 2000);
 }

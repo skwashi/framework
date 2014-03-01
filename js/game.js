@@ -157,7 +157,7 @@ Game.prototype.loadMap = function (filename) {
   var that = this;
   setTimeout(function () {
     that.grid = that.map.makeGrid(that.openX, that.openY);
-    that.cam = new Camera(that.grid, new Vector(0, 0),//that.grid.height - that.context.canvas.height), 
+    that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
 
     that.player = new FreePlayer(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
