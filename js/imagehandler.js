@@ -30,36 +30,14 @@ function Picture (image, context, scale) {
   this.scale = scale;
 }
 
+Picture.prototype.drawPart = function (xO, yO, xT, yT, w, h) {
+  this.context.drawImage(this.image, xO, yO, w, h, xT, yT, w, h);
+};
 
-function ImageHandler () {
-  this.images = [];
-
-  this.addImage = function (image, context, scale, layer) {
-    var pic = new Picture(image, context, scale);
-    if (! (layer === undefined))
-      pic.layer = layer;
-    this.images.push(pic);
-  };
-
-  this.addImages = function(images, context, scale, layer) {
-    for (var i = 0; i < images.length; i++)
-      this.addImage(images[i], context, scale, layer);
-  };
-
-  this.addPicture = function(picture) {
-    this.images.push(picture);
-  };
-
-  this.addPictures = function(pictures) {
-    this.images = this.images.concat(pictures);
-  };
-  
-}
-
-ImageHandler.prototype.drawImage = function(picture, xOrigin, yOrigin, width, height) {
-  var image = picture.image;
-  var context = picture.context;
-  var scale = picture.scale;
+Picture.prototype.draw = function (xOrigin, yOrigin, width, height) {
+  var image = this.image;
+  var context = this.context;
+  var scale = this.scale;
   var bottom = image.height;
   var right = image.width;
 
@@ -108,6 +86,37 @@ ImageHandler.prototype.drawImage = function(picture, xOrigin, yOrigin, width, he
 		      x, y, width, height, 
 		      0, 0, width, height);
   }
+};
+
+
+
+function ImageHandler () {
+  this.images = [];
+
+  this.addImage = function (image, context, scale, layer) {
+    var pic = new Picture(image, context, scale);
+    if (! (layer === undefined))
+      pic.layer = layer;
+    this.images.push(pic);
+  };
+
+  this.addImages = function(images, context, scale, layer) {
+    for (var i = 0; i < images.length; i++)
+      this.addImage(images[i], context, scale, layer);
+  };
+
+  this.addPicture = function(picture) {
+    this.images.push(picture);
+  };
+
+  this.addPictures = function(pictures) {
+    this.images = this.images.concat(pictures);
+  };
+  
+}
+
+ImageHandler.prototype.drawImage = function(picture, xOrigin, yOrigin, width, height) {
+  picture.draw(xOrigin, yOrigin, width, height);
 };
 
 ImageHandler.prototype.drawImages = function (xOrigin, yOrigin, width, height) {

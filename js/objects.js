@@ -1,5 +1,5 @@
 function Drawable(grid, x, y, width, height, color) {
-  Rectangle.call(this, x, y, width, height);
+  Rectangle.call(this, Math.round(x), Math.round(y), Math.round(width), Math.round(height));
   this.grid = grid;
   this.color = color;
   this.hasSprite = false;
@@ -52,10 +52,10 @@ Drawable.prototype.draw = function (context, cam, wrap) {
     x -= cam.pos.x;
     y -= cam.pos.y;
     if (this.hasSprite) {
-      context.drawImage(this.getSprite(), Math.round(x), Math.round(y));
+      context.drawImage(this.getSprite(), x, y);
     }
     else
-      context.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      context.fillRect(x, y, w, h);
   } else if (wrap == true) {
     var right = context.canvas.width;
     var bottom = context.canvas.height;
@@ -81,6 +81,10 @@ function Movable(grid, x, y, width, height, color, speed, vel, force, drag) {
   Drawable.call(this, grid, x, y, width, height, color);
   this.speed = speed;
   this.vel = vel;
+
+  this.x = Math.round(x);
+  this.y = Math.round(y);
+  this.posfloat = new Vector(x - this.x, y - this.y);
 
   this.gridLocked = false;
   this.camLocked = false;
@@ -108,8 +112,14 @@ Movable.prototype.move = function (motionHandler, dt, dir) {
     this.vel.y -= this.drag*this.vel.y*dt;
   }
 
-  this.x += this.vel.x*dt;
-  this.y += this.vel.y*dt;
+  var deltaX = this.posfloat.x + this.vel.x*dt;
+  var deltaY = this.posfloat.y + this.vel.y*dt;
+
+  this.x += Math.round(deltaX);
+  this.y += Math.round(deltaY);
+
+  this.posfloat.x = deltaX - Math.round(deltaX);
+  this.posfloat.y = deltaY - Math.round(deltaY);
 
   if (this.gridLocked)
     this.adjustToGrid();
@@ -143,17 +153,21 @@ Movable.prototype.adjustToGrid = function () {
   if (this.x < 0 && !this.grid.openX) {
     this.x = 0;
     this.vel.x = 0;
+    this.posfloat.x = 0;
   } else if (this.x + this.width > this.grid.width && !this.grid.openX) {
     this.x = this.grid.width - this.width;
     this.vel.x = 0;
+    this.posfloat.x = 0;
   }
   
   if (this.y < 0 && !this.grid.openY) {
     this.y = 0;  
     this.vel.y = 0;
+    this.posfloat.y = 0;
   } else if (this.y + this.height > this.grid.height && ! this.grid.openY) {
     this.y = this.grid.height - this.height;
     this.vel.y = 0;
+    this.posfloat.y = 0;
   }
 };
 

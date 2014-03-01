@@ -1,9 +1,10 @@
 function Camera(grid, pos, width, height, vel) {
   this.grid = grid;
-  this.width = width;
-  this.height = height;
+  this.width = Math.round(width);
+  this.height = Math.round(height);
   this.pos = pos.copy();
   this.initialPos = pos.copy();
+  this.rem = new Vector(0, 0);
   this.vel = vel.copy();
   this.initialVel = vel.copy();
   
@@ -79,20 +80,34 @@ Camera.prototype.move = function (dt) {
         this.vel.y = this.pan * this.followObject.vel.y;
     }
   }
-
-  var x = this.pos.x += this.vel.x * dt;
-  var y = this.pos.y += this.vel.y * dt;
-
-  if (x < 0) 
-    x = (this.grid.openX) ? x : 0;  
-  else if (x > this.grid.width - this.width)
-    x = (this.grid.openX) ? x : this.grid.width - this.width;
-
-  if (y < 0) 
-    y = (this.grid.openY) ? y : 0;  
-  else if (y > this.grid.height - this.height)
-    y = (this.grid.openY) ? y : this.grid.height - this.height;
   
+  var deltaX = this.rem.x + this.vel.x * dt;
+  var deltaY = this.rem.y + this.vel.y * dt;
+
+  var x = this.pos.x += Math.round(deltaX);
+  var y = this.pos.y += Math.round(deltaY);
+
+  this.rem.x = deltaX - Math.round(deltaX);
+  this.rem.y = deltaY - Math.round(deltaY);
+
+  if (x < 0) {
+    x = (this.grid.openX) ? x : 0;
+    this.rem.x = 0;
+  }
+  else if (x > this.grid.width - this.width) {
+    x = (this.grid.openX) ? x : this.grid.width - this.width;
+    this.rem.x = 0;
+  }
+
+  if (y < 0) {
+    y = (this.grid.openY) ? y : 0;
+    this.rem.y = 0;
+  }
+  else if (y > this.grid.height - this.height) {
+    y = (this.grid.openY) ? y : this.grid.height - this.height;
+    this.rem.y = 0;
+  }
+
   this.pos.init(x, y);
 };
 

@@ -15,7 +15,7 @@ function CollisionHandler (grid, colArray, tileWidth, tileHeight) {
 }
 
 
-CollisionHandler.prototype.collidesWithTile = function (rectangle) {
+CollisionHandler.prototype.inSolid = function (rectangle) {
   var tiles = this.grid.tilesIntersected(rectangle);
   return _.some(tiles, function (tile) {
     var mt = this.grid.mapTile(tile);
@@ -25,7 +25,7 @@ CollisionHandler.prototype.collidesWithTile = function (rectangle) {
 };
 
 CollisionHandler.prototype.onGround = function (rectangle) {
-  return this.collidesWithTile({x: rectangle.x, y: rectangle.y + rectangle.height, width: rectangle.width, height: 2});
+  return this.inSolid({x: rectangle.x, y: rectangle.y + rectangle.height, width: rectangle.width, height: 2});
 };
 
 

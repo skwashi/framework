@@ -58,6 +58,7 @@ Player.prototype.move = function (motionHandler, dt, dir) {
     if (!this.cam.folY)
       this.y += this.cam.vel.y * dt;
   }
+
   motionHandler.move(this, dt, dir);
 
   if (this.gridLocked)
@@ -66,6 +67,7 @@ Player.prototype.move = function (motionHandler, dt, dir) {
   if (this.camLocked) {
     this.adjustToCam(this.cam);
   }
+
 };
 
 
@@ -87,7 +89,7 @@ FreePlayer.prototype.move = function (motionHandler, dt, dir) {
     if (!this.cam.folY)
       this.y += this.cam.vel.y * dt;
   }
-
+  
   var ang = this.angle + Math.PI/2;
   dir.x = dir.y * Math.cos(ang);
   dir.y = dir.y * Math.sin(ang);
@@ -100,6 +102,7 @@ FreePlayer.prototype.move = function (motionHandler, dt, dir) {
   if (this.camLocked) {
     this.adjustToCam(this.cam);
   }
+
 };
 
 

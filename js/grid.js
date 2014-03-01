@@ -74,6 +74,22 @@ Grid.prototype.tileCoords = function (vector) {
 	  col: Math.floor(vector.x / this.tileWidth)};
 };
 
+Grid.prototype.nextTileBorder = function (rectangle, direction) {
+  switch(direction) 
+  {
+  case "left": 
+    return Math.floor(rectangle.x / this.tileWidth) * this.tileWidth;
+  case "right":
+    return (Math.floor((rectangle.x + rectangle.width) / this.tileWidth) + 1)*this.tileWidth;
+  case "up":
+    return Math.floor(rectangle.y / this.tileHeight) * this.tileHeight;
+  case "down":
+    return (Math.floor((rectangle.y + rectangle.height) / this.tileHeight) + 1)*this.tileHeight;
+  default:
+    return 0;
+  }
+};
+
 Grid.prototype.mapTile = function (tile) {
   var row = tile.row;
   var col = tile.col;

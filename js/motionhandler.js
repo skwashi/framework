@@ -15,9 +15,7 @@ function MotionHandler(grid, colHandler, type) {
 MotionHandler.prototype.types = ["space", "air", "side", "over"];
 
 MotionHandler.prototype.move = function (object, dt, dir) {
-  var oldpos = new Vector(object.x, object.y);
-  var newpos;
-  var d;
+
   var vx = object.vel.x;
   var vy = object.vel.y;
 
@@ -81,27 +79,60 @@ MotionHandler.prototype.move = function (object, dt, dir) {
     
   }
 
-  newpos = new Vector (oldpos.x + vx * dt, oldpos.y + vy * dt);
+  var deltax = object.posfloat.x + vx * dt;
+  var deltay = object.posfloat.y + vy * dt;
+  
+  var dx = Math.round(deltax);
+  var dy = Math.round(deltay);
+  var remx = deltax - dx;
+  var remy = deltay - dy;
+ 
+  var oldx = object.x;
+  var oldy = object.y;
+  var tw = this.grid.tileWidth;
+  var th = this.grid.tileHeight;
 
   // check for collision with solid tiles
 
-  d = newpos.subtract(oldpos);
+  var incx = 0; 
+  var incy = 0;
 
-  if (this.colHandler.collidesWithTile({x: oldpos.x + d.x, y: oldpos.y, width: object.width, height: object.height})) {
-    newpos.x = oldpos.x;
-    vx = 0;
+  if (dx > 0) {
+    incx = this.grid.nextTileBorder(object, "right") - (oldx + object.width) - 1; 
+    while(incx <= dx && !(this.colHandler.inSolid({x: oldx + incx + tw, y: oldy, width: object.width, height: object.height}))) {
+      incx += tw;
+    }
+    incx = Math.min(dx, incx);
+  } else if (dx < 0) {
+    incx = this.grid.nextTileBorder(object, "left") - oldx + 1; 
+    while(incx >= dx && !(this.colHandler.inSolid({x: oldx + incx - tw, y: oldy, width: object.width, height: object.height}))) {
+      incx -= tw;
+    }
+    incx = Math.max(dx, incx);    
   }
+  
+  if (dy > 0) {
+    incy = this.grid.nextTileBorder(object, "down") - (oldy + object.height) - 1; 
+    while(incy <= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy + th, width: object.width, height: object.height}))) {
+      incy += th;
+    }
+    incy = Math.min(dy, incy);
+  } else if (dy < 0) {
+    incy = this.grid.nextTileBorder(object, "up") - oldy + 1; 
+    while(incy >= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy - th, width: object.width, height: object.height}))) {
+      incy -= th;
+    }
+    incy = Math.max(dy, incy);    
+  } 
 
-  if (this.colHandler.collidesWithTile({x: oldpos.x, y: oldpos.y + d.y, width: object.width, height: object.height})) {
-    newpos.y = oldpos.y;
-    vy = 0;
-  }
-
-  object.x = newpos.x; 
-  object.y = newpos.y;
+ 
+  object.x = oldx + incx;
+  object.y = oldy + incy;
   object.vel.x = vx;
   object.vel.y = vy;
-
+  object.posfloat.x = remx;
+  object.posfloat.y = remy;
+ 
 };
 
 
@@ -123,7 +154,7 @@ MotionHandler.prototype.unstuck = function (object) {
       for (var dy = -range; dy <= range; dy += range) {
         x = Math.min(Math.max(object.x + dx, 0), this.grid.width - object.width);
         y = Math.min(Math.max(object.y + dy, 0), this.grid.height - object.height);
-        if (!(this.colHandler.collidesWithTile({x: x, y: y, width: object.width, height: object.height}))) {
+        if (!(this.colHandler.inSolid({x: x, y: y, width: object.width, height: object.height}))) {
           object.x = x;
           object.y = y;
           return;

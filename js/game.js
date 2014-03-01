@@ -31,16 +31,16 @@ Game.prototype.handleInput = function (dt) {
     move /= 2;
 
   if (keys["left"]) {
-    this.cam.pos.x -= move*dt;
+    this.cam.pos.x -= Math.round(move*dt);
   }
   if (keys["up"]) {
-    this.cam.pos.y -= move*dt;
+    this.cam.pos.y -= Math.round(move*dt);
   }
   if (keys["right"]) {
-    this.cam.pos.x += move*dt;
+    this.cam.pos.x += Math.round(move*dt);
   }  
   if (keys["down"]) {
-    this.cam.pos.y += move*dt;
+    this.cam.pos.y += Math.round(move*dt);
   }
 
   if (keys["a"]) {

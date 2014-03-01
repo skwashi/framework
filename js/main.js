@@ -24,17 +24,14 @@ function init() {
   initBackgrounds(repo, imageHandler, backgrounds, context);
   game.init(context, imageHandler, messageHandler, repo, true, true);
   
+  //game.loadMap("maps/rocks2.json");
   game.loadMap("maps/platforms.json");
-  //game.loadMap("maps/platforms.json");
 
   setTimeout(render, 2000);
 }
 
 function render() {
   requestAnimationFrame(render);
-  game.update();
-  game.update();
-  game.update();
   game.update();
   game.draw();
 }
