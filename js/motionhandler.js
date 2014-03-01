@@ -113,7 +113,6 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   
   if (dy > 0) {
     incy = this.grid.nextTileBorder(object, "down") - (oldy + object.height); 
-    console.log(incy);
     while(incy <= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy + th, width: object.width, height: object.height}))) {
       incy += th;
     }

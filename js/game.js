@@ -132,9 +132,9 @@ Game.prototype.draw = function () {
     this.campos.set(this.cam.pos);
   
   // draw starry backgrounds
-  this.imageHandler.drawLayer(-1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
+  this.imageHandler.drawLevel(-1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
   // draw map background
-  this.imageHandler.drawLayer(0, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
+  this.imageHandler.drawLevel(0, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
 
   // update and draw objects
   
@@ -144,7 +144,7 @@ Game.prototype.draw = function () {
   this.drawCrosshair();
 
   // draw overlayer
-  this.imageHandler.drawLayer(1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
+  this.imageHandler.drawLevel(1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
 
   // show messages
   this.messageHandler.render();
@@ -157,7 +157,7 @@ Game.prototype.loadMap = function (filename) {
   var that = this;
   setTimeout(function () {
     that.grid = that.map.makeGrid(that.openX, that.openY);
-    that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
+    that.cam = new Camera(that.grid, new Vector(0, 0),//that.grid.height - that.context.canvas.height), 
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
 
     that.player = new FreePlayer(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
@@ -169,7 +169,8 @@ Game.prototype.loadMap = function (filename) {
     that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 0);
     that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 1);
     */
-    that.map.loadImages(that.imageHandler, that.context);
+    that.map.loadPictureLayers(that.imageHandler, that.context);
+    //that.map.loadImages(that.imageHandler, that.context);
 
     that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
     

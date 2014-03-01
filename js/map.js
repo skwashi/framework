@@ -144,13 +144,13 @@ function Map (filename) {
             var level = layer.properties["level"];
           else
             var level = 0;
-	  this.tileLayers.push({gids: gids, opacity: layer.opacity, scale: scale, level: level,
+	  this.tileLayers.push({width: this.width, height: this.height, gids: gids, opacity: layer.opacity, scale: scale, level: level,
                                 properties: (layer.properties || {})});
 	}
       }
     }
-    
-    this.renderTileLayers();
+    this.ready = true;
+    //this.renderTileLayers();
   };
   
   this.renderTileLayer = function(layer) {
@@ -319,4 +319,82 @@ Map.prototype.loadImages = function (imageHandler, context) {
   _.forEach(this.tileLayers, function (layer) {
     imageHandler.addImage(layer.image, context, layer.scale, layer.level);
   });
+};
+
+Map.prototype.loadPictureLayers = function (imageHandler, context) {
+  var that = this;
+  _.forEach(this.tileLayers, function (layer) {
+    imageHandler.addPictureLayer(layer, context, layer.scale, that, layer.level);
+  });
+};
+
+Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, height) {
+
+  var gid, id, tx, ty;
+  var tileset;
+  var tw, th;
+
+  context.globalAlpha = layer.opacity;
+  
+  var firstRow = Math.floor(yO / this.tileHeight);
+  var firstCol = Math.floor(xO / this.tileWidth);
+  var rowOffset = Math.floor(yO - firstRow*this.tileWidth);
+  var colOffset = Math.floor(xO - firstCol*this.tileWidth);
+  var lastRow = Math.floor((yO + height-1) / this.tileHeight);
+  var lastCol = Math.floor((xO + width-1) / this.tileWidth);
+  
+  var x = xT;
+  var y = yT;
+
+  var that = this;
+  var f = function (co, ro) {
+    tileset = that.getTileset(gid);
+    tw = tileset.tileWidth;
+    th = tileset.tileHeight;
+    id = gid & 0x0FFFFFFF; // clear the upper bits
+    id -= tileset.gids.first;
+
+    tx = (id % (tileset.width / tw))*tw + co;
+    ty = ~~(id / (tileset.width / tw))*th + ro;
+
+    context.drawImage(tileset.image, tx, ty, tw-co, th-ro, 
+                      x, y, tw-co, th-ro);    
+  };
+
+  // Draw first part of first row
+  gid = layer.gids[firstRow][firstCol];
+  if (gid !=0)
+    f(colOffset, rowOffset);
+  x += this.tileWidth - colOffset;
+
+  for (var col = firstCol+1; col <= lastCol; col++) {
+    gid = layer.gids[firstRow][col];
+    if (gid != 0) {
+      f(0, rowOffset);
+    }
+    x += this.tileHeight;
+  }
+    
+  x = xT;
+  y += this.tileHeight - rowOffset;
+  
+  for (var r = firstRow+1; r <= lastRow; r++) {
+
+    gid = layer.gids[r][firstCol];
+    if (gid != 0)
+      f(colOffset, 0);
+    x += this.tileWidth - colOffset;
+
+    for (var c = firstCol+1; c <= lastCol; c++) {
+      gid = layer.gids[r][c];
+      if (gid != 0) {
+        f(0,0);
+      }
+      x += this.tileWidth;
+    }
+    y += this.tileHeight;
+    x = xT;
+  }
+
+  context.globalAlpha = 1;
 };
