@@ -98,13 +98,13 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   var incy = 0;
 
   if (dx > 0) {
-    incx = this.grid.nextTileBorder(object, "right") - (oldx + object.width) - 1; 
+    incx = this.grid.nextTileBorder(object, "right") - (oldx + object.width);
     while(incx <= dx && !(this.colHandler.inSolid({x: oldx + incx + tw, y: oldy, width: object.width, height: object.height}))) {
       incx += tw;
     }
     incx = Math.min(dx, incx);
   } else if (dx < 0) {
-    incx = this.grid.nextTileBorder(object, "left") - oldx + 1; 
+    incx = this.grid.nextTileBorder(object, "left") - oldx; 
     while(incx >= dx && !(this.colHandler.inSolid({x: oldx + incx - tw, y: oldy, width: object.width, height: object.height}))) {
       incx -= tw;
     }
@@ -112,13 +112,14 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   }
   
   if (dy > 0) {
-    incy = this.grid.nextTileBorder(object, "down") - (oldy + object.height) - 1; 
+    incy = this.grid.nextTileBorder(object, "down") - (oldy + object.height); 
+    console.log(incy);
     while(incy <= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy + th, width: object.width, height: object.height}))) {
       incy += th;
     }
     incy = Math.min(dy, incy);
   } else if (dy < 0) {
-    incy = this.grid.nextTileBorder(object, "up") - oldy + 1; 
+    incy = this.grid.nextTileBorder(object, "up") - oldy; 
     while(incy >= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy - th, width: object.width, height: object.height}))) {
       incy -= th;
     }

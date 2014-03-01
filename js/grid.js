@@ -43,16 +43,16 @@ Grid.prototype.projectRectangle = function (rectangle) {
   return new Rectangle(this.projectX(rectangle.x), this.projectY(rectangle.y), rectangle.width, rectangle.height);
 };
 
-Grid.prototype.isInside = function (vector, width, height) {
-  return vector.x >= 0 && vector.x + width <= this.width &&
-    vector.y >= 0 && vector.y + height <= this.height;
+Grid.prototype.isInside = function (rectangle) {
+  return rectangle.x >= 0 && rectangle.x + rectangle.width <= this.width &&
+    rectangle.y >= 0 && rectangle.y + rectangle.height <= this.height;
 };
 
 Grid.prototype.tilesIntersected = function (rectangle) {
   var left = Math.floor(rectangle.x / this.tileWidth);
-  var right = Math.floor((rectangle.x + rectangle.width) / this.tileWidth);
+  var right = Math.floor((rectangle.x + rectangle.width-1) / this.tileWidth);
   var top = Math.floor(rectangle.y / this.tileHeight);
-  var bottom = Math.floor((rectangle.y + rectangle.height) / this.tileHeight);
+  var bottom = Math.floor((rectangle.y + rectangle.height-1) / this.tileHeight);
   
   var tiles = [];
   
@@ -80,11 +80,11 @@ Grid.prototype.nextTileBorder = function (rectangle, direction) {
   case "left": 
     return Math.floor(rectangle.x / this.tileWidth) * this.tileWidth;
   case "right":
-    return (Math.floor((rectangle.x + rectangle.width) / this.tileWidth) + 1)*this.tileWidth;
+    return (Math.floor((rectangle.x + rectangle.width - 1) / this.tileWidth) + 1)*this.tileWidth;
   case "up":
     return Math.floor(rectangle.y / this.tileHeight) * this.tileHeight;
   case "down":
-    return (Math.floor((rectangle.y + rectangle.height) / this.tileHeight) + 1)*this.tileHeight;
+    return (Math.floor((rectangle.y + rectangle.height - 1) / this.tileHeight) + 1)*this.tileHeight;
   default:
     return 0;
   }
