@@ -398,3 +398,14 @@ Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, heigh
 
   context.globalAlpha = 1;
 };
+
+
+Map.prototype.getObjects = function (name) {
+  return _.flatten(_.map(this.objectLayers, function (layer) {
+    return (name === undefined || layer.name == name) ? layer.objects : [];
+  }));
+};
+
+Map.prototype.getPlayer = function () {
+  return this.getObjects("spawns")[0];
+};

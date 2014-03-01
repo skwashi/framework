@@ -9,10 +9,80 @@ function Game () {
     this.time = Date.now();
     this.campos = null;
 
+
+    this.enemies = [];
+
     this.toggleCooldown = 1;
     this.cooldowns = {follow: 0, lock: 0};
   };
 }
+
+Game.prototype.loadMap = function (filename) {
+  this.map = new Map(filename);
+  this.map.load();
+  var sprite = this.imageRepo.load("imgs/ship.png");
+  var that = this;
+  setTimeout(function () {
+    that.grid = that.map.makeGrid(that.openX, that.openY);
+    that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
+                          that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
+
+    var mapPlayer = that.map.getPlayer();
+    var posx = (mapPlayer != undefined && mapPlayer.x != undefined) ? 
+          mapPlayer.x : that.cam.width/2 - (sprite.width / 2);
+    var posy = (mapPlayer != undefined && mapPlayer.y != undefined) ? 
+          mapPlayer.y : that.cam.pos.y + that.cam.height - sprite.height - 70;
+    that.player = new FreePlayer(that.grid, posx, posy, sprite.width, sprite.height, "blue", 800,
+                             new Vector(0, 0), new Vector(3200, 3200), 60/10, 800);
+    that.player.addSprite(sprite, 0);
+
+    /*
+    that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 0);
+    that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 1);
+    */
+    that.map.loadPictureLayers(that.imageHandler, that.context);
+    //that.map.loadImages(that.imageHandler, that.context);
+
+    that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
+    
+    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");   
+    //that.motionHandler = new MotionHandler(that.grid, that.colHandler, "side");
+    //that.motionHandler.setGravity(1600);
+    //that.motionHandler.setFriction(60/10);
+    
+    //that.loadPlayerSprites(5, 45);
+
+    that.loadEnemies(that.map.getObjects("enemies"));
+    
+    that.time = Date.now();
+  }, 2000);
+  
+};
+
+
+Game.prototype.loadPlayerSprites = function (inc, max) {
+  var filename;
+  for (var i = inc; i <= max; i += inc) {
+    filename = "imgs/shipr"+i+".png";
+    this.imageRepo.load(filename);
+    this.player.addSprite(this.imageRepo.get(filename), i);
+    filename = "imgs/shipl"+i+".png";
+    this.imageRepo.load(filename);
+    this.player.addSprite(this.imageRepo.get(filename), -i);
+  }
+  this.player.angleInc = inc;
+  this.player.angleMax = max;
+
+};
+
+
+Game.prototype.loadEnemies = function (eArray) {
+  this.enemies = _.map(eArray, function (espec) {
+    return new Movable(this.grid, Math.round(espec.x), Math.round(espec.y), Math.round(espec.width), Math.round(espec.height), 
+                       espec.color || "red", espec.speed || 500,  new Vector(espec.properties.vx || 0, espec.properties.vy || 0));
+  }, this);
+};
+
 
 Game.prototype.handleInput = function (dt) {
   var move = 5 * 60;
@@ -61,6 +131,7 @@ Game.prototype.handleInput = function (dt) {
   }
 
   if (keys["z"]) {
+    this.cam.unFollow();
     this.cam.centerOn(this.player, dt);
     this.messageHandler.setMessage("Finding player!", 120);
   }
@@ -121,6 +192,10 @@ Game.prototype.update = function () {
   this.lowerCooldowns(dt);
   this.frameReset();
   this.handleInput(dt);
+
+  // move enemies
+  _.forEach(this.enemies, function (enemy) {enemy.move(this.motionHandler, dt);}, this);
+  
 };
 
 Game.prototype.draw = function () {
@@ -137,6 +212,13 @@ Game.prototype.draw = function () {
   this.imageHandler.drawLevel(0, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
 
   // update and draw objects
+
+  // draw enemies
+
+  _.forEach(this.enemies, function (enemy) {
+    if (this.cam.canSee(enemy))
+        enemy.draw(this.context, this.cam);
+  }, this);
   
   if (this.cam.canSee(this.player)) {
     this.player.draw(this.context, this.cam);
@@ -150,53 +232,3 @@ Game.prototype.draw = function () {
   this.messageHandler.render();
 };
 
-Game.prototype.loadMap = function (filename) {
-  this.map = new Map(filename);
-  this.map.load();
-  var sprite = this.imageRepo.load("imgs/ship.png");
-  var that = this;
-  setTimeout(function () {
-    that.grid = that.map.makeGrid(that.openX, that.openY);
-    that.cam = new Camera(that.grid, new Vector(0, that.grid.height - that.context.canvas.height), 
-                          that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
-
-    that.player = new FreePlayer(that.grid, that.cam.pos.x + that.cam.width/2 - (sprite.width / 2), 
-                             that.cam.pos.y + that.cam.height - sprite.height - 70, sprite.width, sprite.height, "blue", 800,
-                             new Vector(0, 0), new Vector(3200, 3200), 60/10, 800);
-    that.player.addSprite(sprite, 0);
-
-    /*
-    that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 0);
-    that.imageHandler.addImage(that.map.getImage(1), that.context, that.map.getScale(1), 1);
-    */
-    that.map.loadPictureLayers(that.imageHandler, that.context);
-    //that.map.loadImages(that.imageHandler, that.context);
-
-    that.colHandler = new CollisionHandler(that.grid, that.map.getColArray(), that.map.tileWidth, that.map.tileHeight);
-    
-    that.motionHandler = new MotionHandler(that.grid, that.colHandler, "air");   
-    //that.motionHandler = new MotionHandler(that.grid, that.colHandler, "side");
-    //that.motionHandler.setGravity(1600);
-    //that.motionHandler.setFriction(60/10);
-    
-    //that.loadPlayerSprites(5, 45);
-    that.time = Date.now();
-  }, 2000);
-  
-};
-
-
-Game.prototype.loadPlayerSprites = function (inc, max) {
-  var filename;
-  for (var i = inc; i <= max; i += inc) {
-    filename = "imgs/shipr"+i+".png";
-    this.imageRepo.load(filename);
-    this.player.addSprite(this.imageRepo.get(filename), i);
-    filename = "imgs/shipl"+i+".png";
-    this.imageRepo.load(filename);
-    this.player.addSprite(this.imageRepo.get(filename), -i);
-  }
-  this.player.angleInc = inc;
-  this.player.angleMax = max;
-
-};

@@ -40,7 +40,7 @@ Picture.prototype.draw = function (xOrigin, yOrigin, width, height) {
   var scale = this.scale;
   var bottom = image.height;
   var right = image.width;
-
+    
   var x = Math.round((xOrigin < 0) ? 
 	((scale*xOrigin) % right) + right : (scale*xOrigin) % right);
   var y = Math.round((yOrigin < 0) ? 

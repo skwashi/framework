@@ -93,7 +93,7 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   var th = this.grid.tileHeight;
 
   // check for collision with solid tiles
-
+  
   var incx = 0; 
   var incy = 0;
 
@@ -124,7 +124,6 @@ MotionHandler.prototype.move = function (object, dt, dir) {
     }
     incy = Math.max(dy, incy);    
   } 
-
  
   object.x = oldx + incx;
   object.y = oldy + incy;
