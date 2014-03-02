@@ -2,18 +2,23 @@ function ImageRepo () {
   this.repo = {};
   
   this.load = function (filename) {
-    var image = new Image();
-    image.src = filename;
-    this.repo[filename] = image;
-    return image;
+    if (this.repo[filename] === undefined) {
+      var image = new Image();
+      image.src = filename;
+      this.repo[filename] = image;
+    }
+    return this.repo[filename];
   };
 
   this.loadArray = function (array) {
     for (var i = 0; i < array.length; i++)
       this.load(array[i]);
   };
-
+  
   this.get = function (filename) {
+    if (this.repo[filename] === undefined)
+      return this.load(filename);
+    else
       return this.repo[filename];
   };
   
@@ -146,7 +151,6 @@ ImageHandler.prototype.drawLevel = function (level, xOrigin, yOrigin, width, hei
     if (this.images[i].level == level)
       this.drawImage(this.images[i], xOrigin, yOrigin, width, height);
 };
-
 
 function drawRotatedImage(context, image, x, y, angle) {
   context.save();

@@ -1,56 +1,70 @@
-function Player(grid, x, y, width, height, color, speed, vel, force, drag, boost) {
-  Movable.call(this, grid, x, y, width, height, color, speed, vel, force, drag);
-  this.boost = boost;
-  this.sprites = {};
-  
-  this.gridLocked = true;
-
-  this.angle = 0;
-  this.angleInc = 5;
-  this.angleMax = 45;
-  
-}
-Player.prototype = Object.create(Movable.prototype, {
-  boost: {value: 0, writable: true}
-});
-
-
-Player.prototype.addSprite = function (sprite, angle) {
+function Player(ship, type, grid, x, y, vel) {
+  Movable.call(this, grid, x, y, ship.width, ship.height, ship.color, ship.speed, vel, ship.force, ship.drag);
+  this.ship = ship;
   this.hasSprite = true;
-  if (angle == 0) {
-    this.sprite = sprite;
-    var shadow = document.createElement("canvas");
-    shadow.width = sprite.width;
-    shadow.height = sprite.height;
-    this.shadowContext = shadow.getContext("2d");    
+
+  this.type = type; // "free" or "up"
+  
+  this.angle = 0;
+  this.rollAngle = 0;
+  this.rollInc = this.ship.rollInc;
+  this.rollMax = this.ship.rollMax;
+
+  this.gridLocked = true;
+  this.camLocked = false;
+
+  this.cooldown = 0.1;
+  this.cooldowns = {laser: 0};
+}
+Player.prototype = Object.create(Movable.prototype);
+
+Player.prototype.lowerCooldowns = function (dt) {
+  for (key in this.cooldowns) {
+    this.cooldowns[key] = Math.max(0, this.cooldowns[key] - dt);
   }
-  this.sprites[angle] = sprite;
 };
 
+Player.prototype.toggleType = function () {
+  this.angle = 0;
+  this.rollAngle = 0;
+  this.type = (this.type == "free") ? "up" : "free";
+};
+
+
 Player.prototype.getSprite = function () {
-  var angle = Math.floor(this.angle/this.angleInc) * this.angleInc;
-  var sprite = this.sprites[angle];
+  var angle = Math.floor(this.rollAngle/this.rollInc) * this.rollInc;
+  var sprite = this.ship.sprites[angle];
   if (typeof(sprite) === "undefined") {
-    return this.sprite;
+    return this.ship.sprite;
   }
   else {
     return sprite;
   }
 };
 
+
 Player.prototype.move = function (motionHandler, dt, dir) {
-  var sign = (this.angle == 0) ? 0 : ((this.angle > 0) ? 1 : -1);
-  var inc = 4;
   
-  if (sign*this.angle < inc)
-    this.angle = 0;
-  else
-    this.angle -= inc*sign;
+  if (this.type == "up") {
+    var sign = (this.rollAngle == 0) ? 0 : ((this.rollAngle > 0) ? 1 : -1);
+    var inc = this.rollInc - 1;
 
-  this.angle += (5+inc)*dir.x;
+    if (sign*this.rollAngle < inc)
+      this.rollAngle = 0;
+    else
+      this.rollAngle -= inc*sign * dt * 60;
+    
+    this.rollAngle += (this.rollInc+inc)*dir.x * dt * 60;
 
-  if (this.angle*sign > this.angleMax)
-    this.angle = sign*this.angleMax;
+    if (this.rollAngle*sign > this.rollMax)
+      this.rollAngle = sign*this.rollMax;
+    
+  } else if (this.type == "free") {
+    this.angle += dir.x * this.ship.omega * dt;
+    var angle = this.angle + Math.PI/2;
+    dir.x = dir.y * Math.cos(angle);
+    dir.y = dir.y * Math.sin(angle);
+  }
   
   if (this.camLocked) {
     if (!this.cam.folX)
@@ -63,63 +77,41 @@ Player.prototype.move = function (motionHandler, dt, dir) {
 
   if (this.gridLocked)
     this.adjustToGrid();
-
   if (this.camLocked) {
     this.adjustToCam(this.cam);
   }
-
 };
 
 
-
-function FreePlayer(grid, x, y, width, height, color, speed, vel, force, drag, boost) {
-  Player.call(this, grid, x, y, width, height, color, speed, vel, force, drag, boost);
-  this.angle = 0;
-}
-FreePlayer.prototype = Object.create(Player.prototype);
-
-FreePlayer.prototype.move = function (motionHandler, dt, dir) {
-  var omega = 2*Math.PI;
-
-  this.angle += dir.x * omega * dt;
-  
-  if (this.camLocked) {
-    if (!this.cam.folX)
-      this.x += this.cam.vel.x * dt;
-    if (!this.cam.folY)
-      this.y += this.cam.vel.y * dt;
-  }
-  
-  var ang = this.angle + Math.PI/2;
-  dir.x = dir.y * Math.cos(ang);
-  dir.y = dir.y * Math.sin(ang);
-
-  motionHandler.move(this, dt, dir);
-
-  if (this.gridLocked)
-    this.adjustToGrid();
-
-  if (this.camLocked) {
-    this.adjustToCam(this.cam);
-  }
-
-};
-
-
-FreePlayer.prototype.draw = function (context, cam) {
-  var x = this.x;
-  var y = this.y;
+Player.prototype.draw = function (context, cam) {
+  var x = this.x - cam.pos.x;
+  var y = this.y - cam.pos.y;
   var w = this.width;
   var h = this.height;
   
   context.fillStyle = this.color;  
 
-  x -= cam.pos.x;
-  y -= cam.pos.y;
   if (this.hasSprite) {
-    drawRotatedImage(context, this.getSprite(), Math.round(x+this.width/2), Math.round(y+this.height/2), this.angle);
+    if (this.type == "free")
+      drawRotatedImage(context, this.getSprite(), Math.floor(x+w/2), Math.floor(y+h/2), this.angle);
+    else
+      context.drawImage(this.getSprite(), Math.round(x), Math.round(y));
   }
   else
     context.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+};
+
+
+Player.prototype.fire = function(type) {
+  var projectiles;
+  var dir = new Vector(Math.cos(-this.angle + Math.PI/2), -Math.sin(-this.angle + Math.PI/2));
+  var vel = dir.multiply(600);
+  var orth = new Vector(Math.cos(-this.angle), -Math.sin(-this.angle));
+
   
+  projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel, this.angle),
+                 new Laser(this.grid, this.getCenter().x-8*orth.x + 20*dir.x, this.getCenter().y-8*orth.y + 20*dir.y, vel, this.angle),
+                 new Laser(this.grid, this.getCenter().x+6*orth.x + 20*dir.x, this.getCenter().y+6*orth.y + 20*dir.y, vel, this.angle),
+                 new Laser(this.grid, this.getCenter().x+19*orth.x, this.getCenter().y+19*orth.y, vel, this.angle)];
+  return projectiles;
 };

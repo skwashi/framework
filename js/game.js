@@ -11,16 +11,25 @@ function Game () {
 
 
     this.enemies = [];
+    this.projectiles = [];
+
 
     this.toggleCooldown = 1;
-    this.cooldowns = {follow: 0, lock: 0};
+    this.cooldowns = {follow: 0, lock: 0, playertype : 0};
   };
 }
+
+Game.prototype.addEnemies = function (enemies) {
+  this.enemies = this.enemies.concat(enemies);
+};
+
+Game.prototype.addProjectiles = function (projectiles) {
+  this.projectiles = this.projectiles.concat(projectiles);
+};
 
 Game.prototype.loadMap = function (filename) {
   this.map = new Map(filename);
   this.map.load();
-  var sprite = this.imageRepo.load("imgs/ship.png");
   var that = this;
   setTimeout(function () {
     that.grid = that.map.makeGrid(that.openX, that.openY);
@@ -29,12 +38,12 @@ Game.prototype.loadMap = function (filename) {
 
     var mapPlayer = that.map.getPlayer();
     var posx = (mapPlayer != undefined && mapPlayer.x != undefined) ? 
-          mapPlayer.x : that.cam.width/2 - (sprite.width / 2);
+          mapPlayer.x : that.cam.width/2 - 22;
     var posy = (mapPlayer != undefined && mapPlayer.y != undefined) ? 
-          mapPlayer.y : that.cam.pos.y + that.cam.height - sprite.height - 70;
-    that.player = new FreePlayer(that.grid, posx, posy, sprite.width, sprite.height, "blue", 800,
-                             new Vector(0, 0), new Vector(3200, 3200), 60/10, 800);
-    that.player.addSprite(sprite, 0);
+          mapPlayer.y : that.cam.pos.y + that.cam.height - 52 - 70;
+    var raptor = new Raptor("blue");
+    raptor.loadSprites(that.imageRepo, raptor.rollInc, raptor.rollMax);
+    that.player = new Player(raptor, "free", that.grid, posx, posy, new Vector(0, 0));
 
     /*
     that.imageHandler.addImage(that.map.getImage(0), that.context, that.map.getScale(0), 0);
@@ -59,23 +68,6 @@ Game.prototype.loadMap = function (filename) {
   
 };
 
-
-Game.prototype.loadPlayerSprites = function (inc, max) {
-  var filename;
-  for (var i = inc; i <= max; i += inc) {
-    filename = "imgs/shipr"+i+".png";
-    this.imageRepo.load(filename);
-    this.player.addSprite(this.imageRepo.get(filename), i);
-    filename = "imgs/shipl"+i+".png";
-    this.imageRepo.load(filename);
-    this.player.addSprite(this.imageRepo.get(filename), -i);
-  }
-  this.player.angleInc = inc;
-  this.player.angleMax = max;
-
-};
-
-
 Game.prototype.loadEnemies = function (eArray) {
   this.enemies = _.map(eArray, function (espec) {
     return new Movable(this.grid, Math.round(espec.x), Math.round(espec.y), Math.round(espec.width), Math.round(espec.height), 
@@ -88,46 +80,47 @@ Game.prototype.handleInput = function (dt) {
   var move = 5 * 60;
   var dir = new Vector(0,0);
 
-  if (keys["i"])
+  if (keys["q"])
     this.cam.baseVel.y -= 60;
 
-  if (keys["k"])
+  if (keys["e"])
     this.cam.baseVel.y += 60;
 
-  if (keys["e"])
+  if (keys["r"])
     move *= 2;
 
   if (keys["f"])
     move /= 2;
 
-  if (keys["left"]) {
+  if (keys["a"]) {
     this.cam.pos.x -= Math.round(move*dt);
   }
-  if (keys["up"]) {
+  if (keys["w"]) {
     this.cam.pos.y -= Math.round(move*dt);
   }
-  if (keys["right"]) {
+  if (keys["d"]) {
     this.cam.pos.x += Math.round(move*dt);
   }  
-  if (keys["down"]) {
+  if (keys["s"]) {
     this.cam.pos.y += Math.round(move*dt);
   }
 
-  if (keys["a"]) {
+  if (keys["left"]) {
     dir.x -= 1;
   }
-  if (keys["w"]) {
+  if (keys["up"]) {
     dir.y -= 1;
   }
-  if (keys["s"]) {
+  if (keys["down"]) {
     dir.y += 1;
   }  
-  if (keys["d"]) {
+  if (keys["right"]) {
     dir.x += 1;
   }
 
-  if (keys["space"]) {
-    this.motionHandler.jump(this.player, dir);
+  if (keys["x"] && this.player.cooldowns.laser <= 0) {
+    this.addProjectiles(this.player.fire("laser"));
+    this.player.cooldowns.laser = this.player.cooldown;
   }
 
   if (keys["z"]) {
@@ -136,7 +129,7 @@ Game.prototype.handleInput = function (dt) {
     this.messageHandler.setMessage("Finding player!", 120);
   }
   
-  if (keys["x"] && this.cooldowns.follow <= 0) {
+  if (keys["space"] && this.cooldowns.follow <= 0) {
     if (this.cam.followObject == null) {
       this.messageHandler.setMessage("Following player!", 120);
       this.cam.follow(this.player, true, true, 1/3, 1/4);
@@ -147,7 +140,7 @@ Game.prototype.handleInput = function (dt) {
     this.cooldowns.follow = this.toggleCooldown;
   }
   
-  if (keys["r"] && this.cooldowns.lock <= 0) {
+  if (keys["c"] && this.cooldowns.lock <= 0) {
     if (this.player.camLocked == false) {
       this.messageHandler.setMessage("Player locked to camera!", 120);
       this.player.camLock(this.cam);
@@ -157,8 +150,13 @@ Game.prototype.handleInput = function (dt) {
     }
     this.cooldowns.lock = this.toggleCooldown;
   }
+
+  if (keys["m"] && this.cooldowns.playertype <= 0) {
+    this.player.toggleType();
+    this.cooldowns.playertype = this.toggleCooldown;
+  }
   
-  if (keys["q"])
+  if (keys["u"])
     this.motionHandler.unstuck(this.player);
   
   this.cam.move(dt);
@@ -190,9 +188,12 @@ Game.prototype.update = function () {
   this.time = now;
 
   this.lowerCooldowns(dt);
+  this.player.lowerCooldowns(dt);
   this.frameReset();
   this.handleInput(dt);
 
+  // move projectiles
+  _.forEach(this.projectiles, function (projectile) {projectile.move(this.motionHandler, dt);}, this);
   // move enemies
   _.forEach(this.enemies, function (enemy) {enemy.move(this.motionHandler, dt);}, this);
   
@@ -212,8 +213,11 @@ Game.prototype.draw = function () {
   this.imageHandler.drawLevel(0, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
 
   // update and draw objects
-
-  // draw enemies
+  
+  _.forEach(this.projectiles, function (projectile) {
+    if (this.cam.canSee(projectile))
+      projectile.draw(this.context, this.cam);
+  }, this);
 
   _.forEach(this.enemies, function (enemy) {
     if (this.cam.canSee(enemy))

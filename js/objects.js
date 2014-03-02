@@ -5,12 +5,14 @@ function Drawable(grid, x, y, width, height, color) {
   this.hasSprite = false;
   this.sprite = null;
 
+  this.angle = 0;
+
   this.setGrid = function (grid) {
     this.grid = grid;
   };
 
   this.getCenter = function () {
-    return new Vector (this.x + (this.width-1)/2, this.y + (this.width-1)/2);
+    return new Vector (this.x + this.width/2, this.y + this.width/2);
   };
 }
 
@@ -51,9 +53,18 @@ Drawable.prototype.draw = function (context, cam, wrap) {
   if (wrap === undefined || wrap == false) {
     x -= cam.pos.x;
     y -= cam.pos.y;
-    if (this.hasSprite) {
+
+    if (this.angle != undefined && this.angle != 0) {
+      context.save();
+      context.translate(x + Math.floor(w/2), y + Math.floor(h/2));
+      context.rotate(this.angle);
+      if (this.hasSprite)
+        context.drawImage(this.getSprite(), -w/2, -h/2);
+      else
+        context.fillRect(-w/2, -h/2, w, h);
+      context.restore();
+    } else if (this.hasSprite)
       context.drawImage(this.getSprite(), x, y);
-    }
     else
       context.fillRect(x, y, w, h);
   } else if (wrap == true) {

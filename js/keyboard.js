@@ -7,17 +7,26 @@ KEY_CODES = {
   49: "1",
   50: "2",
   65: "a",
+  67: "c",
   68: "d",
   69: "e",
   70: "f",
+  71: "g",
+  72: "h",
   73: "i",
-  72: "j",
+  74: "j",
   75: "k",
+  76: "l",
+  77: "m",
   81: "q",
   82: "r",
   83: "s",
+  84: "t",
+  85: "u",
+  86: "v",
   87: "w",
   88: "x",
+  89: "y",
   90: "z" 
 };
 
@@ -29,7 +38,7 @@ for (var code in KEY_CODES) {
 document.onkeydown = function(e) {
   var keyCode = e.keyCode || e.charKode;
   if (KEY_CODES[keyCode]) {
-    e.preventDefault();
+    //e.preventDefault();
     keys[KEY_CODES[keyCode]] = true;
   }
 };
@@ -37,7 +46,7 @@ document.onkeydown = function(e) {
 document.onkeyup = function(e) {
   var keyCode = e.keyCode || e.charKode;
   if (KEY_CODES[keyCode]) {
-    e.preventDefault();
+    //e.preventDefault();
     keys[KEY_CODES[keyCode]] = false;
   }
 };
