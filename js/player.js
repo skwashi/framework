@@ -145,6 +145,7 @@ Player.prototype.fire = function (type) {
   var projectiles;
   var dir = this.getDirection();
   var vel = dir.multiply(600);
+  vel.increase(this.vel);
   var orth = this.getOrthogonal();
 
   
