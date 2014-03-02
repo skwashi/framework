@@ -37,12 +37,15 @@ Game.prototype.loadMap = function (filename) {
                           that.context.canvas.width, that.context.canvas.height, new Vector(0, 0));
 
     var mapPlayer = that.map.getPlayer();
-    var posx = (mapPlayer != undefined && mapPlayer.x != undefined) ? 
-          mapPlayer.x : that.cam.width/2 - 22;
-    var posy = (mapPlayer != undefined && mapPlayer.y != undefined) ? 
-          mapPlayer.y : that.cam.pos.y + that.cam.height - 52 - 70;
+    //var posx = (mapPlayer != undefined && mapPlayer.x != undefined) ? 
+    //      mapPlayer.x : that.cam.width/2 - 22;
+    //var posy = (mapPlayer != undefined && mapPlayer.y != undefined) ? 
+    //mapPlayer.y : that.cam.pos.y + that.cam.height - 52 - 70;
+    var posx = that.cam.width/2 - 22;
+    var posy = that.cam.pos.y + that.cam.height - 52 - 70;
     var raptor = new Raptor("blue");
     raptor.loadSprites(that.imageRepo, raptor.rollInc, raptor.rollMax);
+    raptor.loadFlameSprites(that.imageRepo);
     that.player = new Player(raptor, "free", that.grid, posx, posy, new Vector(0, 0));
 
     /*

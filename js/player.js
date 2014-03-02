@@ -15,6 +15,10 @@ function Player(ship, type, grid, x, y, vel) {
 
   this.cooldown = 0.1;
   this.cooldowns = {laser: 0};
+
+  this.dt = 0;
+  this.flame = 0;
+  this.flameCurrent = 0;
 }
 Player.prototype = Object.create(Movable.prototype);
 
@@ -45,6 +49,14 @@ Player.prototype.getSprite = function () {
 
 Player.prototype.move = function (motionHandler, dt, dir) {
   
+  this.dt = dt;
+
+  this.flame -= 10*dt + 20*dir.y * dt;
+  if (this.flame <= 0)
+    this.flame = 0;
+  else if (this.flame > 6)
+    this.flame = 6;
+
   if (this.type == "up") {
     var sign = (this.rollAngle == 0) ? 0 : ((this.rollAngle > 0) ? 1 : -1);
     var inc = this.rollInc - 1;
@@ -90,7 +102,14 @@ Player.prototype.draw = function (context, cam) {
   var h = this.height;
   
   context.fillStyle = this.color;  
-
+  
+  // draw flames
+  if (this.flame != 0) {
+    var dir = this.getDirection();
+    var orth = this.getOrthogonal();
+    drawRotatedImage(context, this.getFlameSprite(this.dt), Math.floor(x+w/2 - 40*dir.x), Math.floor(y+h/2 - 40*dir.y), this.angle);
+  }
+  
   if (this.hasSprite) {
     if (this.type == "free")
       drawRotatedImage(context, this.getSprite(), Math.floor(x+w/2), Math.floor(y+h/2), this.angle);
@@ -99,14 +118,34 @@ Player.prototype.draw = function (context, cam) {
   }
   else
     context.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+
 };
 
+Player.prototype.getFlameSprite = function (dt) {
+  if (this.flame <= 4) {
+    this.flameCurrent = 0;
+    return this.ship.outflames[Math.floor(this.flame % 4)];
+  } else {
+    this.flameCurrent += 8*dt;
+    if (this.flameCurrent >= 5)
+      this.flameCurrent = 0;
+    return this.ship.flames[Math.floor(this.flameCurrent)];
+  }
+};
 
-Player.prototype.fire = function(type) {
+Player.prototype.getDirection = function () {
+  return new Vector(Math.cos(-this.angle + Math.PI/2), -Math.sin(-this.angle + Math.PI/2));
+};
+
+Player.prototype.getOrthogonal = function () {
+  return new Vector(Math.cos(-this.angle), -Math.sin(-this.angle));
+};
+
+Player.prototype.fire = function (type) {
   var projectiles;
-  var dir = new Vector(Math.cos(-this.angle + Math.PI/2), -Math.sin(-this.angle + Math.PI/2));
+  var dir = this.getDirection();
   var vel = dir.multiply(600);
-  var orth = new Vector(Math.cos(-this.angle), -Math.sin(-this.angle));
+  var orth = this.getOrthogonal();
 
   
   projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel, this.angle),
