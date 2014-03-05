@@ -6,6 +6,7 @@ function initBackgrounds (repo, imageHandler, backgrounds, context) {
 
 var game = new Game();
 
+
 function init() {
   var imageHandler = new ImageHandler();
   var repo = new ImageRepo();
@@ -14,6 +15,7 @@ function init() {
 //  var bgContext = bgCanvas.getContext("2d");
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
+
 //  var overCanvas = document.getElementById("over");
 //  var overContext = overCanvas.getContext("2d"); 
   var mCanvas = document.getElementById("messages");

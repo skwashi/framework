@@ -196,10 +196,23 @@ Game.prototype.update = function () {
   this.handleInput(dt);
 
   // move projectiles
-  _.forEach(this.projectiles, function (projectile) {projectile.move(this.motionHandler, dt);}, this);
+  _.forEach(this.projectiles, function (projectile) {
+    projectile.move(this.motionHandler, dt);
+    if (this.colHandler.inSolid(projectile)) {
+      var tile = this.grid.mapTile(this.grid.tileCoords({x: projectile.x, y: projectile.y}));
+      this.map.setGid(0, tile, 0);
+      this.colHandler.colArray[tile.row][tile.col] = 0;
+      projectile.remove = true;
+    }
+  }, this);
+  
   // move enemies
   _.forEach(this.enemies, function (enemy) {enemy.move(this.motionHandler, dt);}, this);
   
+  // cleanup
+  for (var i = this.projectiles.length-1; i >= 0; i--)
+    if (this.projectiles[i].remove)
+      this.projectiles.splice(i,1);
 };
 
 Game.prototype.draw = function () {

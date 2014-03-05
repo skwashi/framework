@@ -19,6 +19,8 @@ function Player(ship, type, grid, x, y, vel) {
   this.dt = 0;
   this.flame = 0;
   this.flameCurrent = 0;
+
+  this.angleArchive = [0,0,0,0,0,0];
 }
 Player.prototype = Object.create(Movable.prototype);
 
@@ -31,6 +33,8 @@ Player.prototype.lowerCooldowns = function (dt) {
 Player.prototype.toggleType = function () {
   this.angle = 0;
   this.rollAngle = 0;
+  for (var i = 0; i < this.angleArchive.length; i++)
+    this.angleArchive[i] = 0;
   this.type = (this.type == "free") ? "up" : "free";
 };
 
@@ -72,7 +76,12 @@ Player.prototype.move = function (motionHandler, dt, dir) {
       this.rollAngle = sign*this.rollMax;
     
   } else if (this.type == "free") {
-    this.angle += dir.x * this.ship.omega * dt;
+    var vs = (this.vel.length()/this.ship.speed);
+    this.angle += (Math.max(0.3, 1 - vs*vs))*dir.x * this.ship.omega * dt;
+    for (var i = 0; i < this.angleArchive.length-1; i++) {
+      this.angleArchive[i] = this.angleArchive[i+1];
+    }
+    this.angleArchive[this.angleArchive.length-1] = this.angle;
     var angle = this.angle + Math.PI/2;
     dir.x = dir.y * Math.cos(angle);
     dir.y = dir.y * Math.sin(angle);
@@ -92,6 +101,7 @@ Player.prototype.move = function (motionHandler, dt, dir) {
   if (this.camLocked) {
     this.adjustToCam(this.cam);
   }
+
 };
 
 
@@ -107,7 +117,8 @@ Player.prototype.draw = function (context, cam) {
   if (this.flame != 0) {
     var dir = this.getDirection();
     var orth = this.getOrthogonal();
-    drawRotatedImage(context, this.getFlameSprite(this.dt), Math.floor(x+w/2 - 40*dir.x), Math.floor(y+h/2 - 40*dir.y), this.angle);
+    drawRotatedImage(context, this.getFlameSprite(this.dt), 
+                     Math.floor(x+w/2 - 40*dir.x), Math.floor(y+h/2 - 40*dir.y), this.angleArchive[0]);
   }
   
   if (this.hasSprite) {

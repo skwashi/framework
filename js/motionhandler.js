@@ -103,12 +103,16 @@ MotionHandler.prototype.move = function (object, dt, dir) {
       incx += tw;
     }
     incx = Math.min(dx, incx);
+    if (incx < dx)
+      vx = 0;
   } else if (dx < 0) {
     incx = this.grid.nextTileBorder(object, "left") - oldx; 
     while(incx >= dx && !(this.colHandler.inSolid({x: oldx + incx - tw, y: oldy, width: object.width, height: object.height}))) {
       incx -= tw;
     }
-    incx = Math.max(dx, incx);    
+    incx = Math.max(dx, incx);
+    if (incx > dx)
+      vx = 0;
   }
   
   if (dy > 0) {
@@ -117,14 +121,18 @@ MotionHandler.prototype.move = function (object, dt, dir) {
       incy += th;
     }
     incy = Math.min(dy, incy);
+    if (incy < dy)
+      vy = 0;
   } else if (dy < 0) {
     incy = this.grid.nextTileBorder(object, "up") - oldy; 
     while(incy >= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy - th, width: object.width, height: object.height}))) {
       incy -= th;
     }
-    incy = Math.max(dy, incy);    
+    incy = Math.max(dy, incy);
+    if (incy > dy)
+      vy = 0;
   } 
- 
+
   object.x = oldx + incx;
   object.y = oldy + incy;
   object.vel.x = vx;
@@ -132,14 +140,6 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   object.posfloat.x = remx;
   object.posfloat.y = remy;
  
-};
-
-
-MotionHandler.prototype.jump = function (object, dir) {
-  if (this.colHandler.onGround(object)) {
-    object.vel.y = -object.boost;
-    //object.vel.x = object.boost*dir.x;
-  }
 };
 
 

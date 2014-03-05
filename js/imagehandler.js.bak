@@ -39,12 +39,18 @@ Picture.prototype.drawPart = function (xO, yO, xT, yT, w, h) {
   this.context.drawImage(this.image, xO, yO, w, h, xT, yT, w, h);
 };
 
-Picture.prototype.draw = function (xO, yO, width, height) {
+Picture.prototype.draw = function (xOrigin, yOrigin, width, height) {
   var image = this.image;
   var context = this.context;
   var scale = this.scale;
   var bottom = image.height;
   var right = image.width;
+
+  context.save();
+  context.translate(width/2, height/2);
+  context.rotate(-Math.PI/4);
+  var xO = xOrigin - width/2;
+  var yO = yOrigin - height/2;
 
   var x = Math.round((xO < 0) ? 
 	((scale*xO) % right) + right : (scale*xO) % right);
@@ -91,6 +97,7 @@ Picture.prototype.draw = function (xO, yO, width, height) {
                   width, height);
   }
 
+  context.restore();
 };
 
 

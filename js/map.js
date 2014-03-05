@@ -149,6 +149,7 @@ function Map (filename) {
 	}
       }
     }
+    //this.tileImage = this.makeTileImage();
     this.ready = true;
     //this.renderTileLayers();
   };
@@ -328,6 +329,37 @@ Map.prototype.loadPictureLayers = function (imageHandler, context) {
   });
 };
 
+Map.prototype.makeTileImage = function () {
+  var tx, ty, tw, th, tid;
+  var tileWidth = this.tileWidth;
+  var canvas = document.createElement("canvas");
+  var context = canvas.getContext("2d");
+  canvas.height = this.tileHeight;
+  canvas.width = 0;
+
+  _.forEach(this.tilesets, function (tileset) {
+    canvas.width += tileset.numTiles*tileWidth;
+  }, this);
+  canvas.width += tileWidth;
+  
+  _.forEach(this.tilesets, function (tileset) {
+    tw = tileset.tileWidth;
+    th = tileset.tileHeight;
+    for (var gid = tileset.gids.first; gid <= tileset.gids.last; gid++) {
+      tid = gid - tileset.gids.first;
+      tx = (tid % (tileset.width / tw))*tw;
+      ty = ~~(tid / (tileset.width / tw))*th;
+      context.drawImage(tileset.image, tx, ty, tw, th, gid*tileWidth, 0, tw, th);
+    }
+  }, this);
+            
+  var image = new Image();
+  image.src = canvas.toDataURL("image/bmp");
+
+  return image;
+};
+
+
 Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, height) {
 
   var gid, id, tx, ty;
@@ -347,6 +379,7 @@ Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, heigh
   var y = yT;
 
   var that = this;
+
   var f = function (co, ro) {
     tileset = that.getTileset(gid);
     tw = tileset.tileWidth;
@@ -360,7 +393,7 @@ Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, heigh
     context.drawImage(tileset.image, tx, ty, tw-co, th-ro, 
                       x, y, tw-co, th-ro);    
   };
-
+  
   // Draw first part of first row
   gid = layer.gids[firstRow][firstCol];
   if (gid !=0)
@@ -408,4 +441,8 @@ Map.prototype.getObjects = function (name) {
 
 Map.prototype.getPlayer = function () {
   return this.getObjects("spawns")[0];
+};
+
+Map.prototype.setGid = function (layerNum, tile, gid) {
+  this.tileLayers[layerNum].gids[tile.row][tile.col] = gid;
 };
