@@ -56,6 +56,17 @@ Picture.prototype.draw = function (xO, yO, width, height) {
   if (y == bottom)
     y = 0;
 
+  /*
+  if (this.oldx != undefined && x == this.oldx && y == this.oldy) {
+    this.oldx = x;
+    this.oldy = y;
+    return;
+  }
+  
+  this.oldx = x;
+  this.oldy = y;
+   */
+  
   if (y + height > bottom) {
     if (x + width > right) {
       this.drawPart(x, y, 

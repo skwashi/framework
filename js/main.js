@@ -11,8 +11,8 @@ function init() {
   var imageHandler = new ImageHandler();
   var repo = new ImageRepo();
   var backgrounds = ["imgs/background2.png", "imgs/stars.png"];
-//  var bgCanvas = document.getElementById("background");
-//  var bgContext = bgCanvas.getContext("2d");
+ // var bgCanvas = document.getElementById("background");
+ // var bgContext = bgCanvas.getContext("2d");
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
 
@@ -28,6 +28,7 @@ function init() {
   
   //game.loadMap("maps/rocks2.json");
   game.loadMap("maps/platforms.json");
+  //game.loadMap("maps/world.json");
 
   setTimeout(render, 2000);
 }

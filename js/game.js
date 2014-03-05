@@ -9,23 +9,13 @@ function Game () {
     this.time = Date.now();
     this.campos = null;
 
-
-    this.enemies = [];
-    this.projectiles = [];
-
+    this.world = null;
 
     this.toggleCooldown = 1;
     this.cooldowns = {follow: 0, lock: 0, playertype : 0};
   };
 }
 
-Game.prototype.addEnemies = function (enemies) {
-  this.enemies = this.enemies.concat(enemies);
-};
-
-Game.prototype.addProjectiles = function (projectiles) {
-  this.projectiles = this.projectiles.concat(projectiles);
-};
 
 Game.prototype.loadMap = function (filename) {
   this.map = new Map(filename);
@@ -64,6 +54,9 @@ Game.prototype.loadMap = function (filename) {
     
     //that.loadPlayerSprites(5, 45);
 
+    that.world = new World(that, that.map, that.grid, that.cam);
+    that.world.addPlayer(that.player);
+
     that.loadEnemies(that.map.getObjects("enemies"));
     
     that.time = Date.now();
@@ -72,7 +65,7 @@ Game.prototype.loadMap = function (filename) {
 };
 
 Game.prototype.loadEnemies = function (eArray) {
-  this.enemies = _.map(eArray, function (espec) {
+  this.world.enemies = _.map(eArray, function (espec) {
     return new Movable(this.grid, Math.round(espec.x), Math.round(espec.y), Math.round(espec.width), Math.round(espec.height), 
                        espec.color || "red", espec.speed || 500,  new Vector(espec.properties.vx || 0, espec.properties.vy || 0));
   }, this);
@@ -122,7 +115,7 @@ Game.prototype.handleInput = function (dt) {
   }
 
   if (keys["x"] && this.player.cooldowns.laser <= 0) {
-    this.addProjectiles(this.player.fire("laser"));
+    this.world.addProjectiles(this.player.fire("laser"));
     this.player.cooldowns.laser = this.player.cooldown;
   }
 
@@ -164,6 +157,7 @@ Game.prototype.handleInput = function (dt) {
   
   this.cam.move(dt);
   this.player.move(this.motionHandler, dt, dir);
+
 };
 
 Game.prototype.frameReset = function () {
@@ -194,25 +188,7 @@ Game.prototype.update = function () {
   this.player.lowerCooldowns(dt);
   this.frameReset();
   this.handleInput(dt);
-
-  // move projectiles
-  _.forEach(this.projectiles, function (projectile) {
-    projectile.move(this.motionHandler, dt);
-    if (this.colHandler.inSolid(projectile)) {
-      var tile = this.grid.mapTile(this.grid.tileCoords({x: projectile.x, y: projectile.y}));
-      this.map.setGid(0, tile, 0);
-      this.colHandler.colArray[tile.row][tile.col] = 0;
-      projectile.remove = true;
-    }
-  }, this);
-  
-  // move enemies
-  _.forEach(this.enemies, function (enemy) {enemy.move(this.motionHandler, dt);}, this);
-  
-  // cleanup
-  for (var i = this.projectiles.length-1; i >= 0; i--)
-    if (this.projectiles[i].remove)
-      this.projectiles.splice(i,1);
+  this.world.update(dt);
 };
 
 Game.prototype.draw = function () {
@@ -222,29 +198,15 @@ Game.prototype.draw = function () {
     this.campos = this.cam.pos.copy();
   else
     this.campos.set(this.cam.pos);
-  
+
   // draw starry backgrounds
   this.imageHandler.drawLevel(-1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
   // draw map background
   this.imageHandler.drawLevel(0, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
 
-  // update and draw objects
-  
-  _.forEach(this.projectiles, function (projectile) {
-    if (this.cam.canSee(projectile))
-      projectile.draw(this.context, this.cam);
-  }, this);
-
-  _.forEach(this.enemies, function (enemy) {
-    if (this.cam.canSee(enemy))
-        enemy.draw(this.context, this.cam);
-  }, this);
-  
-  if (this.cam.canSee(this.player)) {
-    this.player.draw(this.context, this.cam);
-  }
+  this.world.draw(this.context);
   this.drawCrosshair();
-
+  
   // draw overlayer
   this.imageHandler.drawLevel(1, this.cam.pos.x, this.cam.pos.y, this.cam.width, this.cam.height);
 

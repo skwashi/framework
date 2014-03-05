@@ -88,12 +88,18 @@ Player.prototype.move = function (motionHandler, dt, dir) {
   }
   
   if (this.camLocked) {
-    if (!this.cam.folX)
-      this.x += this.cam.vel.x * dt;
-    if (!this.cam.folY)
-      this.y += this.cam.vel.y * dt;
+    var addx = this.posfloat.x + this.cam.vel.x*dt;
+    var addy = this.posfloat.y + this.cam.vel.y*dt;
+    if (!this.cam.folX) {
+      this.x += Math.round(addx);
+      this.posfloat.x = addx - Math.round(addx);
+    }
+    if (!this.cam.folY) {
+      this.y += Math.round(addy);
+      this.posfloat.y = addy - Math.round(addy);
+    }
   }
-
+  
   motionHandler.move(this, dt, dir);
 
   if (this.gridLocked)

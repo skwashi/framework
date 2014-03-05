@@ -78,9 +78,9 @@ MotionHandler.prototype.move = function (object, dt, dir) {
     }
     
   }
-
-  var deltax = object.posfloat.x + vx * dt;
-  var deltay = object.posfloat.y + vy * dt;
+  
+  var deltax = object.posfloat.x + vx*dt;
+  var deltay = object.posfloat.y + vy*dt;
   
   var dx = Math.round(deltax);
   var dy = Math.round(deltay);

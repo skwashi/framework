@@ -149,7 +149,7 @@ function Map (filename) {
 	}
       }
     }
-    //this.tileImage = this.makeTileImage();
+    this.tileCanvas = this.makeTileCanvas();
     this.ready = true;
     //this.renderTileLayers();
   };
@@ -329,7 +329,7 @@ Map.prototype.loadPictureLayers = function (imageHandler, context) {
   });
 };
 
-Map.prototype.makeTileImage = function () {
+Map.prototype.makeTileCanvas = function () {
   var tx, ty, tw, th, tid;
   var tileWidth = this.tileWidth;
   var canvas = document.createElement("canvas");
@@ -353,10 +353,7 @@ Map.prototype.makeTileImage = function () {
     }
   }, this);
             
-  var image = new Image();
-  image.src = canvas.toDataURL("image/bmp");
-
-  return image;
+  return canvas;
 };
 
 
@@ -379,7 +376,8 @@ Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, heigh
   var y = yT;
 
   var that = this;
-
+  
+  /*
   var f = function (co, ro) {
     tileset = that.getTileset(gid);
     tw = tileset.tileWidth;
@@ -393,7 +391,14 @@ Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, heigh
     context.drawImage(tileset.image, tx, ty, tw-co, th-ro, 
                       x, y, tw-co, th-ro);    
   };
-  
+  */
+  tw = this.tileWidth;
+  th = this.tileHeight;
+  var f = function (co, ro) {
+    id = gid & 0x0FFFFFFF;
+    context.drawImage(that.tileCanvas, id*tw+co, 0+ro, tw-co, th-ro, 
+                      x, y, tw-co, th-ro);
+  };
   // Draw first part of first row
   gid = layer.gids[firstRow][firstCol];
   if (gid !=0)
