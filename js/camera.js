@@ -1,13 +1,10 @@
-function Camera(grid, pos, width, height, vel) {
+function Camera(grid, x, y, width, height, vx, vy) {
+  Rectangle.call(this, x, y, width, height);
   this.grid = grid;
-  this.width = Math.round(width);
-  this.height = Math.round(height);
-  this.pos = pos.copy();
-  this.initialPos = pos.copy();
-  this.vel = vel.copy();
-  this.initialVel = vel.copy();
-  
-  this.baseVel = vel.copy();
+  this.vx = vx;
+  this.vy = vy;
+  this.initial = {x: x, y: y, vx: vx, vy: vy};
+  this.base = {vx: vx, vy: vy};
 
   this.followObject = null;
   this.folX = false;
@@ -15,24 +12,29 @@ function Camera(grid, pos, width, height, vel) {
   this.folLimit = 0;
   this.pan = 1;
 
-  this.set = function(pos, vel) {
-    this.pos.set(pos);
-    this.vel.set(vel);
+  this.set = function(x, y, vx, vy) {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+  };
+
+  this.setBaseVel = function () {
+    this.vx = this.base.vx;
+    this.vy = this.base.vy;
   };
 
   this.reset = function () {
-    this.set(this.initialPos, this.initialVel);
+    this.set(this.initial.x, this.initial.y,
+             this.initial.vx, this.initial.vy);
   };
 
   this.getPos = function () {
-    return this.grid.project(this.pos);
-  };
-
-  this.getCenter = function () {
-    return new Vector(Math.ceil(this.pos.x + (this.width-1)/2), Math.ceil(this.pos.y + (this.height-1)/2));
+    return this.grid.project(x, y);
   };
   
 }
+Camera.prototype = Object.create(Rectangle.prototype);
 
 Camera.prototype.follow = function (object, folX, folY, limit, pan) {
   this.followObject = object;
@@ -51,56 +53,42 @@ Camera.prototype.unFollow = function () {
 
 Camera.prototype.centerOn = function (object, dt) {
   var t = 5*dt;
-  this.vel.x = (object.getCenter().x - this.getCenter().x) / t;
-  this.vel.y = (object.getCenter().y - this.getCenter().y) / t;
+  this.vx = (object.getCenter().x - this.getCenter().x) / t;
+  this.vy = (object.getCenter().y - this.getCenter().y) / t;
 };
 
 Camera.prototype.move = function (dt) {
 
   if (!(this.followObject == null)) {
     if (this.folX) {
-      if ((this.followObject.x < this.pos.x + this.width * this.folLimit
-           && this.followObject.vel.x < 0)
-          || (this.followObject.x > this.pos.x + (1-this.folLimit) * this.width
-              && this.followObject.vel.x > 0))
-        this.vel.x = this.followObject.vel.x;
+      if ((this.followObject.x < this.x + this.width * this.folLimit
+           && this.followObject.vx < 0)
+          || (this.followObject.x > this.x + (1-this.folLimit) * this.width
+              && this.followObject.vx > 0))
+        this.vx = this.followObject.vx;
       else
-        this.vel.x = this.pan * this.followObject.vel.x;
+        this.vx = this.pan * this.followObject.vx;
     }
     if (this.folY) {
-      if ((this.followObject.y < this.pos.y + this.height * this.folLimit
-           && this.followObject.vel.y < 0)
-          || (this.followObject.y + this.followObject.height > this.pos.y + (1-this.folLimit) * this.height
-              && this.followObject.vel.y > 0))
-        this.vel.y = this.followObject.vel.y;
+      if ((this.followObject.y < this.y + this.height * this.folLimit
+           && this.followObject.vy < 0)
+          || (this.followObject.y + this.followObject.height > this.y + (1-this.folLimit) * this.height
+              && this.followObject.vy > 0))
+        this.vy = this.followObject.vy;
       else
-        this.vel.y = this.pan * this.followObject.vel.y;
+        this.vy = this.pan * this.followObject.vy;
     }
   }
   
-  var x = this.pos.x += this.vel.x*dt;
-  var y = this.pos.y += this.vel.y*dt;
+  this.x += this.vx*dt;
+  this.y += this.vy*dt;
 
-  if (x < 0) {
-    x = (this.grid.openX) ? x : 0;
-  }
-  else if (x > this.grid.width - this.width) {
-    x = (this.grid.openX) ? x : this.grid.width - this.width;
-  }
-
-  if (y < 0) {
-    y = (this.grid.openY) ? y : 0;
-  }
-  else if (y > this.grid.height - this.height) {
-    y = (this.grid.openY) ? y : this.grid.height - this.height;
-  }
-
-  this.pos.init(x, y);
+  this.adjustToGrid(this.grid);
 };
 
 Camera.prototype.canSee = function (rect) {
-  return !(rect.x + rect.width < this.pos.x ||
-	  rect.x > this.pos.x + this.width ||
-	  rect.y + rect.height < this.pos.y ||
-	  rect.y > this.pos.y + this.height);
+  return !(rect.x + rect.width < this.x ||
+	  rect.x > this.x + this.width ||
+	  rect.y + rect.height < this.y ||
+	  rect.y > this.y + this.height);
 };

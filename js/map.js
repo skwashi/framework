@@ -144,8 +144,7 @@ function Map (filename) {
             var level = layer.properties["level"];
           else
             var level = 0;
-	  this.tileLayers.push({width: this.width, height: this.height, gids: gids, opacity: layer.opacity, scale: scale, level: level,
-                                properties: (layer.properties || {})});
+	  this.tileLayers.push({name: layer.name, width: this.width, height: this.height, gids: gids, opacity: layer.opacity, scale: scale, level: level, properties: (layer.properties || {})});
 	}
       }
     }
@@ -329,6 +328,17 @@ Map.prototype.loadPictureLayers = function (imageHandler, context) {
   });
 };
 
+Map.prototype.loadTileMaps = function (imageHandler, context) {
+  var tileMap;
+  _.forEach(this.tileLayers, function (layer) {
+    if (layer.name != "world" && layer.name != "World") {
+      tileMap = this.makeTileMap(layer);    
+      tileMap.context = context;
+      imageHandler.addTileMap(tileMap, layer.level);
+    }
+  }, this);
+};
+
 Map.prototype.makeTileCanvas = function () {
   var tx, ty, tw, th, tid;
   var tileWidth = this.tileWidth;
@@ -364,14 +374,14 @@ Map.prototype.drawLayer = function (context, layer, xO, yO, xT, yT, width, heigh
   var tw, th;
 
   context.globalAlpha = layer.opacity;
-  
+
   var firstRow = Math.floor(yO / this.tileHeight);
   var firstCol = Math.floor(xO / this.tileWidth);
   var rowOffset = Math.floor(yO - firstRow*this.tileWidth);
   var colOffset = Math.floor(xO - firstCol*this.tileWidth);
   var lastRow = Math.floor((yO + height-1) / this.tileHeight);
   var lastCol = Math.floor((xO + width-1) / this.tileWidth);
-  
+
   var x = xT;
   var y = yT;
 
@@ -450,4 +460,33 @@ Map.prototype.getPlayer = function () {
 
 Map.prototype.setGid = function (layerNum, tile, gid) {
   this.tileLayers[layerNum].gids[tile.row][tile.col] = gid;
+};
+
+Map.prototype.makeTileMap = function (layer, makeProps) {
+
+  if (this.tileCanvas === undefined)
+    this.tileCanvas = this.makeTileCanvas();
+
+  var gid;
+  var gids = [];
+  
+  for (var row = 0; row < this.numRows; row++) {
+    gids[row] = [];
+      for (var col = 0; col < this.numColumns; col++) {
+        gids[row][col] = layer.gids[row][col];
+      }
+  }
+  
+  tileMap = new TileMap(this.tileCanvas, gids, this.tileWidth, this.tileHeight, layer.opacity, layer.scale);
+  if (makeProps === true)
+    tileMap.propMap = this.getPropArray();
+  return tileMap;
+};
+
+Map.prototype.makeWorldMap = function () {
+  for (var i = 0; i < this.tileLayers.length; i++)
+    if (this.tileLayers[i].name == "world" || this.tileLayers[i].name == "World")
+      return this.makeTileMap(this.tileLayers[i], true);
+
+  return false;
 };

@@ -1,5 +1,5 @@
-function Player(ship, type, grid, x, y, vel) {
-  Movable.call(this, grid, x, y, ship.width, ship.height, ship.color, ship.speed, vel, ship.force, ship.drag);
+function Player(ship, type, grid, x, y, vx, vy) {
+  Movable.call(this, grid, x, y, ship.width, ship.height, ship.color, ship.speed, vx, vy, ship.fx, ship.fy, ship.drag);
   this.ship = ship;
   this.hasSprite = true;
 
@@ -76,8 +76,8 @@ Player.prototype.move = function (motionHandler, dt, dir) {
       this.rollAngle = sign*this.rollMax;
     
   } else if (this.type == "free") {
-    var vs = (this.vel.length()/this.ship.speed);
-    this.angle += (Math.max(0.3, 1 - vs*vs))*dir.x * this.ship.omega * dt;
+    var vs = (this.vx*this.vx + this.vy*this.vy)/(this.ship.speed*this.ship.speed);
+    this.angle += (Math.max(0.3, 1 - vs))*dir.x * this.ship.omega * dt;
     for (var i = 0; i < this.angleArchive.length-1; i++) {
       this.angleArchive[i] = this.angleArchive[i+1];
     }
@@ -88,22 +88,19 @@ Player.prototype.move = function (motionHandler, dt, dir) {
   }
   
   if (this.camLocked) {
-    var addx = this.posfloat.x + this.cam.vel.x*dt;
-    var addy = this.posfloat.y + this.cam.vel.y*dt;
     if (!this.cam.folX) {
-      this.x += Math.round(addx);
-      this.posfloat.x = addx - Math.round(addx);
+      this.x += this.cam.vx * dt;
     }
     if (!this.cam.folY) {
-      this.y += Math.round(addy);
-      this.posfloat.y = addy - Math.round(addy);
+      this.y += this.cam.vy * dt;
     }
   }
   
+  //Movable.prototype.move.call(this, motionHandler, dt, dir);
   motionHandler.move(this, dt, dir);
 
   if (this.gridLocked)
-    this.adjustToGrid();
+    this.adjustToGrid(this.grid);
   if (this.camLocked) {
     this.adjustToCam(this.cam);
   }
@@ -112,8 +109,8 @@ Player.prototype.move = function (motionHandler, dt, dir) {
 
 
 Player.prototype.draw = function (context, cam) {
-  var x = this.x - cam.pos.x;
-  var y = this.y - cam.pos.y;
+  var x = this.x - cam.x;
+  var y = this.y - cam.y;
   var w = this.width;
   var h = this.height;
   
@@ -124,17 +121,17 @@ Player.prototype.draw = function (context, cam) {
     var dir = this.getDirection();
     var orth = this.getOrthogonal();
     drawRotatedImage(context, this.getFlameSprite(this.dt), 
-                     Math.floor(x+w/2 - 40*dir.x), Math.floor(y+h/2 - 40*dir.y), this.angleArchive[0]);
+                     ~~(x+w/2 - 40*dir.x), ~~(y+h/2 - 40*dir.y), this.angleArchive[0]);
   }
   
   if (this.hasSprite) {
     if (this.type == "free")
-      drawRotatedImage(context, this.getSprite(), Math.floor(x+w/2), Math.floor(y+h/2), this.angle);
+      drawRotatedImage(context, this.getSprite(), ~~(x+w/2), ~~(y+h/2), this.angle);
     else
-      context.drawImage(this.getSprite(), Math.round(x), Math.round(y));
+      context.drawImage(this.getSprite(), ~~x, ~~y);
   }
   else
-    context.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    context.fillRect(~~x, ~~y, ~~w, ~~h);
 
 };
 
@@ -162,13 +159,14 @@ Player.prototype.fire = function (type) {
   var projectiles;
   var dir = this.getDirection();
   var vel = dir.multiply(600);
-  vel.increase(this.vel);
+  vel.x += (this.camLocked && !this.cam.folX) ? this.cam.vx : 0;
+  vel.y += (this.camLocked && !this.cam.folY) ? this.cam.vy : 0;
   var orth = this.getOrthogonal();
 
   
-  projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel, this.angle),
-                 new Laser(this.grid, this.getCenter().x-8*orth.x + 20*dir.x, this.getCenter().y-8*orth.y + 20*dir.y, vel, this.angle),
-                 new Laser(this.grid, this.getCenter().x+6*orth.x + 20*dir.x, this.getCenter().y+6*orth.y + 20*dir.y, vel, this.angle),
-                 new Laser(this.grid, this.getCenter().x+19*orth.x, this.getCenter().y+19*orth.y, vel, this.angle)];
+  projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel.x, vel.y, this.angle),
+                 new Laser(this.grid, this.getCenter().x-8*orth.x + 20*dir.x, this.getCenter().y-8*orth.y + 20*dir.y, vel.x, vel.y, this.angle),
+                 new Laser(this.grid, this.getCenter().x+6*orth.x + 20*dir.x, this.getCenter().y+6*orth.y + 20*dir.y, vel.x, vel.y, this.angle),
+                 new Laser(this.grid, this.getCenter().x+19*orth.x, this.getCenter().y+19*orth.y, vel.x, vel.y, this.angle)];
   return projectiles;
 };

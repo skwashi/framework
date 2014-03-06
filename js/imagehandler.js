@@ -33,6 +33,8 @@ function Picture (image, context, scale) {
   this.image = image;
   this.context = context;
   this.scale = scale;
+  this.width = image.width;
+  this.height = image.height;
 }
 
 Picture.prototype.drawPart = function (xO, yO, xT, yT, w, h) {
@@ -40,8 +42,7 @@ Picture.prototype.drawPart = function (xO, yO, xT, yT, w, h) {
 };
 
 Picture.prototype.draw = function (xO, yO, width, height) {
-  var image = this.image;
-  var context = this.context;
+  var image = this.image || this;
   var scale = this.scale;
   var bottom = image.height;
   var right = image.width;
@@ -104,12 +105,13 @@ Picture.prototype.draw = function (xO, yO, width, height) {
 
 };
 
-
 function PictureLayer (layer, context, scale, map) {
   this.image = layer;
   this.context = context;
   this.scale = scale;
   this.map = map;
+  this.width = this.image.width;
+  this.height = this.image.height;
 }
 PictureLayer.prototype = Object.create(Picture.prototype);
 
@@ -134,6 +136,12 @@ function ImageHandler () {
     this.images.push(pl);
   };
 
+  this.addTileMap = function (tileMap, level) {
+    if (! (level === undefined))
+      tileMap.level = level;
+    this.images.push(tileMap);
+  };
+  
   this.addImages = function(images, context, scale, level) {
     for (var i = 0; i < images.length; i++)
       this.addImage(images[i], context, scale, level);

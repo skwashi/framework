@@ -1,15 +1,61 @@
-function Rectangle(x, y, width, height) {
+function Rectangle(x, y, width, height, angle) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
+  this.angle = angle || 0;
+  
+  this.set = function (x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.width = w || this.width;
+    this.height = h || this.height;
+  };
 
   this.translate = function (x, y) {
     this.x += x;
     this.y += y;
   };
     
-}
+  this.getCenter = function () {
+    return {x:this.x + this.width/2, y: this.y + this.width/2};
+  };
+};
+
+Rectangle.prototype.adjustToRectangle = function (rect) {
+  if (this.x < rect.x)
+    this.x = rect.x;
+  else if (this.x + this.width > rect.x + rect.width)
+    this.x = rect.x + rect.width - this.width;
+  
+  if (this.y < rect.y)
+    this.y = rect.y;
+  else if (this.y + this.height > rect.y + rect.height)
+    this.y = rect.y + rect.height - this.height;  
+};
+
+Rectangle.prototype.adjustToGrid = function (grid) {
+  if (this.x < 0 && !grid.openX) {
+    this.x = 0;
+    this.vx = 0;
+  } else if (this.x + this.width > grid.width && !grid.openX) {
+    this.x = grid.width - this.width;
+    this.vx = 0;
+  }
+  
+  if (this.y < 0 && !grid.openY) {
+    this.y = 0;  
+    this.vy = 0;
+  } else if (this.y + this.height > grid.height && ! grid.openY) {
+    this.y = grid.height - this.height;
+    this.vy = 0;
+  }
+};
+
+Rectangle.prototype.adjustToCam = function (cam) {
+  this.adjustToRectangle(cam);
+};
+
 
 Rectangle.prototype.wrap = function (right, bottom) {
   var x = this.x;

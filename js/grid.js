@@ -30,8 +30,8 @@ Grid.prototype.projectY = function (y) {
   return (gy == this.height) ? 0 : gy;
 };
 
-Grid.prototype.project = function (vector) {
-  return new Vector(this.projectX(vector.x), this.projectY(vector.y));
+Grid.prototype.project = function (x, y) {
+  return {x: this.projectX(x), y: this.projectY(y)};
 };
 
 Grid.prototype.projectRectangle = function (rectangle) {
@@ -69,9 +69,9 @@ Grid.prototype.tilesCrossed = function(startRect, endRect) {
   return this.tilesIntersected(startRect.span(endRect));				 
 };
 
-Grid.prototype.tileCoords = function (vector) {
-  return {row: Math.floor(vector.y / this.tileHeight), 
-	  col: Math.floor(vector.x / this.tileWidth)};
+Grid.prototype.tileCoords = function (x, y) {
+  return {row: Math.floor(y / this.tileHeight), 
+	  col: Math.floor(x / this.tileWidth)};
 };
 
 Grid.prototype.nextTileBorder = function (rectangle, direction) {

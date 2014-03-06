@@ -16,8 +16,8 @@ MotionHandler.prototype.types = ["space", "air", "side", "over"];
 
 MotionHandler.prototype.move = function (object, dt, dir) {
 
-  var vx = object.vel.x;
-  var vy = object.vel.y;
+  var vx = object.vx;
+  var vy = object.vy;
 
   if (this.type == "air") {
     
@@ -26,13 +26,13 @@ MotionHandler.prototype.move = function (object, dt, dir) {
       vy -= vy * Math.min(1, object.drag * dt);
     }
   
-    if (!(object.force === undefined || dir === undefined)) {
+    if (!(dir === undefined)) {
       if (vx * dir.x / (Math.abs(dir.x) || 1) <= object.speed)
-        vx += object.force.x * dir.x * dt;
+        vx += object.fx * dir.x * dt;
       else
         vx = (vx > 0) ? object.speed : -object.speed;
       if (vy * dir.y / (Math.abs(dir.y) || 1) <= object.speed)
-        vy += object.force.y * dir.y * dt;
+        vy += object.fy * dir.y * dt;
       else
         vy = (vy > 0) ? object.speed : -object.speed;
     }
@@ -42,16 +42,14 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   else if (this.type == "side") {
     
     vy += this.gravity * dt;
-
     if (this.colHandler.onGround(object)) {
       vx -= vx * Math.min(1, this.friction * dt);
     } else
       vx -= vx * Math.min(1, object.drag*dt);
-
         
-    if (!(object.force === undefined || dir === undefined)) {
+    if (!(dir === undefined)) {
       if (vx * dir.x / (Math.abs(dir.x) || 1) <= object.speed)
-        vx += object.force.x * dir.x * dt;
+        vx += object.fx * dir.x * dt;
       else
         vx = (vx > 0) ? object.speed : -object.speed;
     }
@@ -60,18 +58,18 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   
   else if (this.type == "space") {
 
-    if (!(object.force === undefined || dir === undefined)) {
+    if (!(dir === undefined)) {
       if (dir.x == 0)
         vx = 0;
       else if (vx * dir.x / Math.abs(dir.x) <= object.speed)
-        vx += object.force.x * dir.x * dt;
+        vx += object.fx * dir.x * dt;
       else
         vx = (vx > 0) ? object.speed : -object.speed;
         
       if (dir.y == 0)
         vy = 0;
       else if (vy * dir.y / Math.abs(dir.y) <= object.speed)
-        vy += object.force.y * dir.y * dt;
+        vy += object.fy * dir.y * dt;
       else
         vy = (vy > 0) ? object.speed : - object.speed;
 
@@ -79,13 +77,8 @@ MotionHandler.prototype.move = function (object, dt, dir) {
     
   }
   
-  var deltax = object.posfloat.x + vx*dt;
-  var deltay = object.posfloat.y + vy*dt;
-  
-  var dx = Math.round(deltax);
-  var dy = Math.round(deltay);
-  var remx = deltax - dx;
-  var remy = deltay - dy;
+  var dx = vx*dt;
+  var dy = vy*dt;
  
   var oldx = object.x;
   var oldy = object.y;
@@ -135,10 +128,8 @@ MotionHandler.prototype.move = function (object, dt, dir) {
 
   object.x = oldx + incx;
   object.y = oldy + incy;
-  object.vel.x = vx;
-  object.vel.y = vy;
-  object.posfloat.x = remx;
-  object.posfloat.y = remy;
+  object.vx = vx;
+  object.vy = vy;
  
 };
 

@@ -14,12 +14,11 @@ function CollisionHandler (grid, colArray, tileWidth, tileHeight) {
 
 }
 
-
 CollisionHandler.prototype.inSolid = function (rectangle) {
   var tiles = this.grid.tilesIntersected(rectangle);
   return _.some(tiles, function (tile) {
     var mt = this.grid.mapTile(tile);
-    return (this.colArray[mt.row][mt.col] == 1);
+    return (this.colArray[mt.row][mt.col].solid != undefined);
   }, this);
 
 };

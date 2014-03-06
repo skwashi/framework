@@ -4,6 +4,7 @@ function World (game, map, grid, cam) {
   this.grid = grid;
   this.cam = cam;
 
+  this.tileMap = map.makeWorldMap();
   this.enemies = [];
   this.projectiles = [];
 }
@@ -27,9 +28,8 @@ World.prototype.update = function (dt) {
   _.forEach(this.projectiles, function (projectile) {
     projectile.move(this.game.motionHandler, dt);
     if (this.game.colHandler.inSolid(projectile)) {
-      var tile = this.grid.mapTile(this.grid.tileCoords({x: projectile.x, y: projectile.y}));
-      this.map.setGid(0, tile, 0);
-      this.game.colHandler.colArray[tile.row][tile.col] = 0;
+      var tile = this.grid.mapTile(this.grid.tileCoords(projectile.x, projectile.y));
+      this.tileMap.destroy(tile);
       projectile.remove = true;
     }
   }, this);
@@ -45,6 +45,10 @@ World.prototype.update = function (dt) {
 };
 
 World.prototype.draw = function (context) {
+  
+  if (this.tileMap.context === undefined)
+    this.tileMap.context = context;
+  this.tileMap.draw(this.cam.x, this.cam.y, this.cam.width, this.cam.height);
 
   _.forEach(this.projectiles, function (projectile) {
     if (this.cam.canSee(projectile))
