@@ -26,6 +26,10 @@ function ImageRepo () {
     return _.map(array, this.get);
   };
 
+  this.clear = function () {
+    this.repo = [];
+  };
+
 }
 
 
@@ -154,7 +158,10 @@ function ImageHandler () {
   this.addPictures = function(pictures) {
     this.images = this.images.concat(pictures);
   };
-  
+
+  this.clear = function () {
+    this.images = [];
+  };
 }
 
 ImageHandler.prototype.drawImage = function(picture, xOrigin, yOrigin, width, height) {

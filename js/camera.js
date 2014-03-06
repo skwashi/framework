@@ -57,6 +57,11 @@ Camera.prototype.centerOn = function (object, dt) {
   this.vy = (object.getCenter().y - this.getCenter().y) / t;
 };
 
+Camera.prototype.findObject = function (object) {
+  this.x += object.getCenter().x - this.getCenter().x;
+  this.y += object.getCenter().y - this.getCenter().y;
+};
+
 Camera.prototype.move = function (dt) {
 
   if (!(this.followObject == null)) {
@@ -91,4 +96,11 @@ Camera.prototype.canSee = function (rect) {
 	  rect.x > this.x + this.width ||
 	  rect.y + rect.height < this.y ||
 	  rect.y > this.y + this.height);
+};
+
+Camera.prototype.outOfRange = function (rect, n) {
+  return (rect.x + rect.width < this.x - n*this.width ||
+          rect.x > this.x + (n+1)*this.width ||
+          rect.y + rect.height < this.y - n*this.height ||
+          rect.y > this.y + (n+1)*this.height);
 };

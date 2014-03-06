@@ -51,7 +51,7 @@ Player.prototype.getSprite = function () {
 };
 
 
-Player.prototype.move = function (motionHandler, dt, dir) {
+Player.prototype.move = function (dt, dir) {
   
   this.dt = dt;
 
@@ -87,17 +87,7 @@ Player.prototype.move = function (motionHandler, dt, dir) {
     dir.y = dir.y * Math.sin(angle);
   }
   
-  if (this.camLocked) {
-    if (!this.cam.folX) {
-      this.x += this.cam.vx * dt;
-    }
-    if (!this.cam.folY) {
-      this.y += this.cam.vy * dt;
-    }
-  }
-  
-  //Movable.prototype.move.call(this, motionHandler, dt, dir);
-  motionHandler.move(this, dt, dir);
+  game.motionHandler.move(this, dt, dir);
 
   if (this.gridLocked)
     this.adjustToGrid(this.grid);

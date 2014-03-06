@@ -1,22 +1,17 @@
 // coordinate system in which objects move
-function Grid(width, height, tileWidth, tileHeight, openX, openY) {
-  this.width = width;
-  this.height = height;
-  this.tileWidth = tileWidth;
-  this.tileHeight = tileHeight;
-  this.numRows = Math.floor(height / tileHeight);
-  this.numCols = Math.floor(width / tileWidth);
-  this.openX = openX;
-  this.openY = openY;
-  
-  this.set = function (width, height, tileWidth, tileHeight, openX, openY) {
+function Grid (width, height, tileWidth, tileHeight, openX, openY) {
+  this.init = function (width, height, tileWidth, tileHeight, openX, openY) {
     this.width = width;
     this.height = height;
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
+    this.numRows = Math.floor(height / tileHeight);
+    this.numCols = Math.floor(width / tileWidth);
     this.openX = openX;
     this.openY = openY;
   };
+  
+  this.init(width, height, tileWidth, tileHeight, openX, openY);
 
 }
 

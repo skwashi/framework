@@ -14,9 +14,7 @@ function Map (filename) {
   this.ready = false;
   this.canvas = null;
   this.context = null;
-  this.propArray = null;
-  this.colArray = null;
-
+  
   this.getTileCoords = function (vector) {
     return {row: Math.floor(vector.y / this.tileHeight), 
 	    col: Math.floor(vector.x / this.tileWidth)};
@@ -73,7 +71,7 @@ function Map (filename) {
   };
   
   this.load = function () {
-    $.getJSON(filename).done($.proxy(this.loadData, this));	      
+    $.getJSON(this.filename).done($.proxy(this.loadData, this));	      
   };
 
   this.loadData = function(json) {
@@ -202,6 +200,8 @@ function Map (filename) {
   };
 
   this.getImage = function (n) {
+    if (this.tileLayers[n].image === undefined)
+      this.renderTileLayer(this.tileLayers[n]);
     return this.tileLayers[n].image;
   };
   
@@ -285,33 +285,8 @@ function Map (filename) {
       }
     }
 
-    this.propArray = propArray;
+    return propArray;
   }; 
-
-  this.getPropArray = function () {
-    if (this.propArray == null)
-      this.makePropArray();
-    return this.propArray;
-  };
-
-  this.makeColArray = function () {
-    var propArray = this.getPropArray();
-    var colArray = [];    
-
-    for (var row = 0; row < this.numRows; row++) {
-      colArray[row] = _.map(propArray[row], function (props) {
-        return (props.hasOwnProperty("collision") || props.hasOwnProperty("solid")) ? 1 : 0; 
-      });
-    }
-
-    this.colArray = colArray;
-  };
-
-  this.getColArray = function () {
-    if (this.colArray == null)
-      this.makeColArray();
-    return this.colArray;
-  };
 
 }
 
@@ -479,7 +454,7 @@ Map.prototype.makeTileMap = function (layer, makeProps) {
   
   tileMap = new TileMap(this.tileCanvas, gids, this.tileWidth, this.tileHeight, layer.opacity, layer.scale);
   if (makeProps === true)
-    tileMap.propMap = this.getPropArray();
+    tileMap.propMap = this.makePropArray();
   return tileMap;
 };
 

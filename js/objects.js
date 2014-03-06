@@ -4,8 +4,6 @@ function Drawable(grid, x, y, width, height, color) {
   this.color = color;
   this.hasSprite = false;
   this.sprite = null;
-
-
 }
 Drawable.prototype = Object.create(Rectangle.prototype);
 
@@ -85,7 +83,7 @@ function Movable(grid, x, y, width, height, color, speed, vx, vy, fx, fy, drag) 
 
 Movable.prototype = Object.create(Drawable.prototype);
 
-Movable.prototype.move = function (motionHandler, dt, dir) {
+Movable.prototype.move = function (dt, dir) {
   
   if (!(dir === undefined)) {
     this.vx += this.fx*dir.x*dt;
@@ -114,8 +112,11 @@ Movable.prototype.gridLock = function () {
 Movable.prototype.camLock = function (cam) {
   this.camLocked = true;
   this.cam = cam;
+  this.base = cam.base;
 };
 
-
-
-
+Movable.prototype.camUnlock = function () {
+  this.camLocked = false;
+  this.cam = null;
+  this.base = null;
+};

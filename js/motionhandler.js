@@ -1,8 +1,9 @@
-function MotionHandler(grid, colHandler, type) {
-  this.grid = grid;
-  this.colHandler = colHandler;
-  this.type = type;
-
+function MotionHandler() {
+  this.init = function (grid, type) {
+    this.grid = grid;
+    this.type = type;
+  };
+  
   this.setGravity = function (gravity) {
     this.gravity = gravity;
   };
@@ -42,7 +43,7 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   else if (this.type == "side") {
     
     vy += this.gravity * dt;
-    if (this.colHandler.onGround(object)) {
+    if (game.colHandler.onGround(object)) {
       vx -= vx * Math.min(1, this.friction * dt);
     } else
       vx -= vx * Math.min(1, object.drag*dt);
@@ -79,7 +80,14 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   
   var dx = vx*dt;
   var dy = vy*dt;
- 
+
+  if (object.camLocked) {
+    if (!object.cam.folX)
+      dx += object.base.vx * dt;
+    if (!object.cam.folY)
+      dy += object.base.vy * dt;
+  }
+
   var oldx = object.x;
   var oldy = object.y;
   var tw = this.grid.tileWidth;
@@ -92,7 +100,7 @@ MotionHandler.prototype.move = function (object, dt, dir) {
 
   if (dx > 0) {
     incx = this.grid.nextTileBorder(object, "right") - (oldx + object.width);
-    while(incx <= dx && !(this.colHandler.inSolid({x: oldx + incx + tw, y: oldy, width: object.width, height: object.height}))) {
+    while(incx <= dx && !(game.colHandler.inSolid({x: oldx + incx + tw, y: oldy, width: object.width, height: object.height}))) {
       incx += tw;
     }
     incx = Math.min(dx, incx);
@@ -100,7 +108,7 @@ MotionHandler.prototype.move = function (object, dt, dir) {
       vx = 0;
   } else if (dx < 0) {
     incx = this.grid.nextTileBorder(object, "left") - oldx; 
-    while(incx >= dx && !(this.colHandler.inSolid({x: oldx + incx - tw, y: oldy, width: object.width, height: object.height}))) {
+    while(incx >= dx && !(game.colHandler.inSolid({x: oldx + incx - tw, y: oldy, width: object.width, height: object.height}))) {
       incx -= tw;
     }
     incx = Math.max(dx, incx);
@@ -110,7 +118,7 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   
   if (dy > 0) {
     incy = this.grid.nextTileBorder(object, "down") - (oldy + object.height); 
-    while(incy <= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy + th, width: object.width, height: object.height}))) {
+    while(incy <= dy && !(game.colHandler.inSolid({x: oldx + incx, y: oldy + incy + th, width: object.width, height: object.height}))) {
       incy += th;
     }
     incy = Math.min(dy, incy);
@@ -118,7 +126,7 @@ MotionHandler.prototype.move = function (object, dt, dir) {
       vy = 0;
   } else if (dy < 0) {
     incy = this.grid.nextTileBorder(object, "up") - oldy; 
-    while(incy >= dy && !(this.colHandler.inSolid({x: oldx + incx, y: oldy + incy - th, width: object.width, height: object.height}))) {
+    while(incy >= dy && !(game.colHandler.inSolid({x: oldx + incx, y: oldy + incy - th, width: object.width, height: object.height}))) {
       incy -= th;
     }
     incy = Math.max(dy, incy);
@@ -130,6 +138,30 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   object.y = oldy + incy;
   object.vx = vx;
   object.vy = vy;
+  
+  
+  // check for collision with solid objects
+  
+  var colObjects = game.colHandler.collidingObjects("solids", object);
+  
+  _.forEach(colObjects, function (co) {
+    if (oldx + object.width <= co.x) {
+      object.x = co.x - object.width;
+      object.vx = 0;
+    }
+    else if (oldx >= co.x + co.width) {
+      object.x = co.x+co.width;
+      object.vx = 0;
+    }
+    else if (oldy + object.height <= co.y) {
+      object.y = co.y - object.height;
+      object.vy = 0;
+    }
+    else if (oldy >= co.y + co.height) {
+      object.y = co.y + co.height;
+      object.vy = 0;
+    }
+  }, this);
  
 };
 
@@ -144,7 +176,7 @@ MotionHandler.prototype.unstuck = function (object) {
       for (var dy = -range; dy <= range; dy += range) {
         x = Math.min(Math.max(object.x + dx, 0), this.grid.width - object.width);
         y = Math.min(Math.max(object.y + dy, 0), this.grid.height - object.height);
-        if (!(this.colHandler.inSolid({x: x, y: y, width: object.width, height: object.height}))) {
+        if (!(game.colHandler.inSolid({x: x, y: y, width: object.width, height: object.height}))) {
           object.x = x;
           object.y = y;
           return;

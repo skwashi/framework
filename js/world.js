@@ -1,12 +1,15 @@
-function World (game, map, grid, cam) {
-  this.game = game;
+function World (map, grid, cam) {
   this.map = map;
   this.grid = grid;
   this.cam = cam;
 
-  this.tileMap = map.makeWorldMap();
-  this.enemies = [];
-  this.projectiles = [];
+  this.reset = function () {
+    this.tileMap = this.map.makeWorldMap();
+    this.enemies = [];
+    this.projectiles = [];
+  };
+
+  this.reset();
 }
 
 World.prototype.addPlayer = function (player) {
@@ -21,27 +24,42 @@ World.prototype.addProjectiles = function (projectiles) {
   this.projectiles = this.projectiles.concat(projectiles);
 };
 
+World.prototype.cleanArray = function (array) {
+  for (var i = array.length-1; i >= 0; i--)
+    if (array[i].remove)
+      array.splice(i,1);
+};
 
 World.prototype.update = function (dt) {
 
-    // move projectiles
+  // unregister all objects
+  
+
+  // move projectiles
+  game.colHandler.clearBuckets("projectiles");
   _.forEach(this.projectiles, function (projectile) {
-    projectile.move(this.game.motionHandler, dt);
-    if (this.game.colHandler.inSolid(projectile)) {
+    projectile.move(dt);
+    game.colHandler.registerObject("projectiles", projectile);
+    if (game.colHandler.inSolid(projectile)) {
       var tile = this.grid.mapTile(this.grid.tileCoords(projectile.x, projectile.y));
       this.tileMap.destroy(tile);
       projectile.remove = true;
     }
+    if (this.cam.outOfRange(projectile, 2))
+      projectile.remove = true;
   }, this);
   
   // move enemies
-  _.forEach(this.enemies, function (enemy) {enemy.move(this.motionHandler, dt);}, this);
+  game.colHandler.clearBuckets("solids");
+  _.forEach(this.enemies, function (enemy) {
+    enemy.move(dt);
+    game.colHandler.registerObject("solids", enemy);
+  }, this);
   
   // cleanup
-  for (var i = this.projectiles.length-1; i >= 0; i--)
-    if (this.projectiles[i].remove)
-      this.projectiles.splice(i,1);
-
+  this.cleanArray(this.projectiles);
+  this.cleanArray(this.enemies);
+  
 };
 
 World.prototype.draw = function (context) {

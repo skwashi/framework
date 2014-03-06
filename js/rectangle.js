@@ -107,6 +107,6 @@ Rectangle.prototype.collides = function (rectangle) {
   var rx = rectangle.x; var ry = rectangle.y;
   var rw = rectangle.width; var rh = rectangle.height;
   
-  return (rx <= x + w && x <= rx + rw &&
-	  ry <= y + h && y <= ry + rh);
+  return (rx < x + w && x < rx + rw &&
+	  ry < y + h && y < ry + rh);
 };
