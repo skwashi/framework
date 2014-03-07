@@ -3,6 +3,7 @@ function Projectile (grid, x, y, width, height, color, speed, vx, vy, angle) {
   this.angle = angle;
 }
 Projectile.prototype = Object.create(Movable.prototype);
+Projectile.prototype.deathSpawn = function () { return []; };
 
 function Laser (grid, x, y, vx, vy, angle) {
   Projectile.call(this, grid, x, y, 3, 10, "lightgreen", 1000, vx, vy, angle);

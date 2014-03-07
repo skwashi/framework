@@ -23,19 +23,23 @@ MotionHandler.prototype.move = function (object, dt, dir) {
   if (this.type == "air") {
     
     if (!(object.drag === undefined)) {
-      vx -= vx * Math.min(1, object.drag * dt);
-      vy -= vy * Math.min(1, object.drag * dt);
+      var drag = (object.dampen) ? 2*object.drag : object.drag;
+      vx -= vx * Math.min(1, drag * dt);
+      vy -= vy * Math.min(1, drag * dt);
     }
   
     if (!(dir === undefined)) {
-      if (vx * dir.x / (Math.abs(dir.x) || 1) <= object.speed)
-        vx += object.fx * dir.x * dt;
+      var speed = object.speed;
+      var fx = (object.dampen) ? 0.5*object.fx : object.fx;
+      var fy = (object.dampen) ? 0.5*object.fy : object.fy;
+      if (vx * dir.x / (Math.abs(dir.x) || 1) <= speed)
+        vx += fx * dir.x * dt;
       else
-        vx = (vx > 0) ? object.speed : -object.speed;
-      if (vy * dir.y / (Math.abs(dir.y) || 1) <= object.speed)
-        vy += object.fy * dir.y * dt;
+        vx = (vx > 0) ? speed : -speed;
+      if (vy * dir.y / (Math.abs(dir.y) || 1) <= speed)
+        vy += fy * dir.y * dt;
       else
-        vy = (vy > 0) ? object.speed : -object.speed;
+        vy = (vy > 0) ? speed : -speed;
     }
     
   } 
@@ -83,9 +87,9 @@ MotionHandler.prototype.move = function (object, dt, dir) {
 
   if (object.camLocked) {
     if (!object.cam.folX)
-      dx += object.base.vx * dt;
+      dx += object.basevel.x * dt;
     if (!object.cam.folY)
-      dy += object.base.vy * dt;
+      dy += object.basevel.y * dt;
   }
 
   var oldx = object.x;

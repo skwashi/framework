@@ -20,7 +20,7 @@ Drawable.prototype.clear = function (context, cam) {
   context.clearRect(~~(this.x - cam.x), ~~(this.y - cam.y), ~~this.width, ~~this.height);
 };
 
-Drawable.prototype.draw = function (context, cam, wrap) {
+Drawable.prototype.draw = function (context, cam) {
   var x = this.x;
   var y = this.y;
   var w = this.width;
@@ -28,43 +28,25 @@ Drawable.prototype.draw = function (context, cam, wrap) {
   
   context.fillStyle = this.color;
 
-  if (wrap === undefined || wrap == false) {
-    x -= cam.x;
-    y -= cam.y;
+  x -= cam.x;
+  y -= cam.y;
 
-    if (this.angle != undefined && this.angle != 0) {
-      context.save();
-      context.translate(~~(x + w/2), ~~(y + h/2));
-      context.rotate(this.angle);
-      if (this.hasSprite)
-        context.drawImage(this.getSprite(), ~(-w/2), ~(-h/2));
-      else
-        context.fillRect(-w/2, -h/2, w, h);
-      context.restore();
-    } else if (this.hasSprite)
-      context.drawImage(this.getSprite(), ~~x, ~~y);
+  if (this.angle != undefined && this.angle != false) {
+    context.save();
+    context.translate(~~(x + w/2), ~~(y + h/2));
+    context.rotate(Math.PI/2 + this.angle);
+    if (this.hasSprite)
+      context.drawImage(this.getSprite(), ~(-w/2), ~(-h/2));
     else {
-      context.fillRect(~~x, ~~y, ~~w, ~~h);
+      context.fillRect(-w/2, -h/2, w, h);
     }
-  } else if (wrap == true) {
-    var right = context.canvas.width;
-    var bottom = context.canvas.height;
-    var px = this.grid.projectX(this.x);
-    var py = this.grid.projectY(this.y);
-    
-    var rectangles = this.wrap(right, bottom);
-    var rect;
-    for (var i = 0; i < rectangles.length; i++) {
-      rect = rectangles[i];
-      if (this.hasSprite) 
-	context.drawImage(this.getSprite(), Math.round(this.grid.projectX(rect.x - px)),
-			  Math.round(this.grid.projectY(rect.y - py)),
-			  Math.round(rect.width), Math.round(rect.height),
-			  Math.round(rect.x), Math.round(rect.y), Math.round(rect.width), Math.round(rect.height));
-      else
-	context.fillRect(Math.round(rect.x), Math.round(rect.y), Math.round(rect.width), Math.round(rect.height));
-    }
+    context.restore();
+  } else if (this.hasSprite)
+    context.drawImage(this.getSprite(), ~~x, ~~y);
+  else {
+    context.fillRect(~~x, ~~y, ~~w, ~~h);
   }
+
 };
 
 function Movable(grid, x, y, width, height, color, speed, vx, vy, fx, fy, drag) {
@@ -112,11 +94,34 @@ Movable.prototype.gridLock = function () {
 Movable.prototype.camLock = function (cam) {
   this.camLocked = true;
   this.cam = cam;
-  this.base = cam.base;
+  this.basevel = cam.basevel;
 };
 
 Movable.prototype.camUnlock = function () {
   this.camLocked = false;
   this.cam = null;
-  this.base = null;
+  this.basevel = {x: 0, y: 0};
+};
+
+Movable.prototype.deathSpawn = function () {
+  var pi = Math.PI;
+  var a = this.angle;
+  return [this.split(a + 3*pi/4), this.split(a + pi/2), this.split(a + pi/4),
+	  this.split(a + pi),                           this.split(a + 0),
+	  this.split(a - 3*pi/4), this.split(a - pi/2), this.split(a - pi/4)];
+};
+
+Movable.prototype.split = function (angle) {
+  var dx = Math.cos(angle);
+  var dy = Math.sin(angle);
+  var w = this.width/3;
+  var h = this.height/3;
+  var x = this.x + (dx+1)*w;
+  var y = this.y + (dy+1)*w;
+  var vx = 600*dx;
+  var vy = 600*dy;
+  var block = new Projectile(this.grid, x, y, w, h, this.color, this.speed, vx, vy, angle);
+  block.remove = true;
+  block.timeToDeath = 1;
+  return block;
 };

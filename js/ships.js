@@ -38,7 +38,7 @@ Ship.prototype.loadFlameSprites = function(imageRepo) {
 };
 
 function Raptor (color) {
-  Ship.call(this, 45, 52, 800, color, 3200, 3200, 6, 2*Math.PI, "raptor"); // (3200,3200), 6 ; (1200,1200), 0.5
+  Ship.call(this, 45, 52, 700, color, 4200, 4200, 6, 2*Math.PI, "raptor"); // 800, (3200,3200), 6 ; (1200,1200), 0.5
   this.rollInc = 5;
   this.rollMax = 45;
 };

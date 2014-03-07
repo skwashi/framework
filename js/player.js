@@ -21,6 +21,8 @@ function Player(ship, type, grid, x, y, vx, vy) {
   this.flameCurrent = 0;
 
   this.angleArchive = [0,0,0,0,0,0];
+
+  this.dampen = false;
 }
 Player.prototype = Object.create(Movable.prototype);
 
@@ -77,14 +79,14 @@ Player.prototype.move = function (dt, dir) {
     
   } else if (this.type == "free") {
     var vs = (this.vx*this.vx + this.vy*this.vy)/(this.ship.speed*this.ship.speed);
-    this.angle += (Math.max(0.3, 1 - vs))*dir.x * this.ship.omega * dt;
+    this.angle -= (Math.max(0.3, 1 - vs))*dir.x * this.ship.omega * dt;
     for (var i = 0; i < this.angleArchive.length-1; i++) {
       this.angleArchive[i] = this.angleArchive[i+1];
     }
     this.angleArchive[this.angleArchive.length-1] = this.angle;
-    var angle = this.angle + Math.PI/2;
-    dir.x = dir.y * Math.cos(angle);
-    dir.y = dir.y * Math.sin(angle);
+    var angle = this.angle;
+    dir.x = dir.y * Math.sin(angle);
+    dir.y = dir.y * Math.cos(angle);
   }
   
   game.motionHandler.move(this, dt, dir);
@@ -138,25 +140,25 @@ Player.prototype.getFlameSprite = function (dt) {
 };
 
 Player.prototype.getDirection = function () {
-  return new Vector(Math.cos(-this.angle + Math.PI/2), -Math.sin(-this.angle + Math.PI/2));
+  return new Vector(-Math.sin(this.angle), -Math.cos(this.angle));
 };
 
 Player.prototype.getOrthogonal = function () {
-  return new Vector(Math.cos(-this.angle), -Math.sin(-this.angle));
+  return new Vector(-Math.sin(this.angle - Math.PI/2), -Math.cos(this.angle - Math.PI/2));
 };
 
 Player.prototype.fire = function (type) {
   var projectiles;
   var dir = this.getDirection();
+  var angle = Math.atan2(dir.y, dir.x);
   var vel = dir.multiply(600);
-  vel.x += (this.camLocked && !this.cam.folX) ? this.cam.vx : 0;
-  vel.y += (this.camLocked && !this.cam.folY) ? this.cam.vy : 0;
+  vel.x += (this.camLocked && !this.cam.folX) ? this.cam.basevel.x : 0;
+  vel.y += (this.camLocked && !this.cam.folY) ? this.cam.basevel.y : 0;
   var orth = this.getOrthogonal();
 
-  
-  projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel.x, vel.y, this.angle),
-                 new Laser(this.grid, this.getCenter().x-8*orth.x + 20*dir.x, this.getCenter().y-8*orth.y + 20*dir.y, vel.x, vel.y, this.angle),
-                 new Laser(this.grid, this.getCenter().x+6*orth.x + 20*dir.x, this.getCenter().y+6*orth.y + 20*dir.y, vel.x, vel.y, this.angle),
-                 new Laser(this.grid, this.getCenter().x+19*orth.x, this.getCenter().y+19*orth.y, vel.x, vel.y, this.angle)];
+  projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel.x, vel.y, angle),
+                 new Laser(this.grid, this.getCenter().x-8*orth.x + 20*dir.x, this.getCenter().y-8*orth.y + 20*dir.y, vel.x, vel.y, angle),
+                 new Laser(this.grid, this.getCenter().x+6*orth.x + 20*dir.x, this.getCenter().y+6*orth.y + 20*dir.y, vel.x, vel.y, angle),
+                 new Laser(this.grid, this.getCenter().x+19*orth.x, this.getCenter().y+19*orth.y, vel.x, vel.y, angle)];
   return projectiles;
 };

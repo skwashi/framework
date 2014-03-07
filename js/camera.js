@@ -4,7 +4,7 @@ function Camera(grid, x, y, width, height, vx, vy) {
   this.vx = vx;
   this.vy = vy;
   this.initial = {x: x, y: y, vx: vx, vy: vy};
-  this.base = {vx: vx, vy: vy};
+  this.basevel = {x: vx, y: vy};
 
   this.followObject = null;
   this.folX = false;
@@ -20,8 +20,8 @@ function Camera(grid, x, y, width, height, vx, vy) {
   };
 
   this.setBaseVel = function () {
-    this.vx = this.base.vx;
-    this.vy = this.base.vy;
+    this.vx = this.basevel.x;
+    this.vy = this.basevel.y;
   };
 
   this.reset = function () {

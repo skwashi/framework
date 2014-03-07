@@ -182,7 +182,7 @@ ImageHandler.prototype.drawLevel = function (level, xOrigin, yOrigin, width, hei
 function drawRotatedImage(context, image, x, y, angle) {
   context.save();
   context.translate(x, y);
-  context.rotate(angle);
+  context.rotate(-angle);
   context.drawImage(image, -image.width/2, -image.height/2);
   context.restore();
 }

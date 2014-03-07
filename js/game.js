@@ -27,7 +27,7 @@ function Game () {
     this.campos = null;
 
     this.toggleCD = 1;
-    this.cooldowns = {follow: 0, lock: 0, playertype : 0};
+    this.cooldowns = {follow: 0, lock: 0, playertype: 0, addEnemy: 0};
   };
 }
 
@@ -61,7 +61,8 @@ Game.prototype.loadMap = function (filename) {
     raptor.loadFlameSprites(that.imageRepo);
     that.player = new Player(raptor, "free", that.grid, posx, posy, 0, 0);
     that.cam.findObject(that.player);
-        
+    that.cam.follow(that.player, true, true, 1/3, 1/4);
+    
     that.world = new World(that.map, that.grid, that.cam);
     that.world.addPlayer(that.player);
 
@@ -89,10 +90,10 @@ Game.prototype.handleInput = function (dt) {
   // camera input
 
   if (keys["q"])
-    this.cam.base.vy -= 60;
+    this.cam.basevel.y -= 60;
 
   if (keys["e"])
-    this.cam.base.vy += 60;
+    this.cam.basevel.y += 60;
 
   if (keys["r"])
     move *= 2;
@@ -169,7 +170,33 @@ Game.prototype.handleInput = function (dt) {
   
   if (keys["u"])
     this.motionHandler.unstuck(this.player);
+
+  if (keys["v"])
+    this.player.dampen = true;
+  else
+    this.player.dampen = false;
   
+
+  // Nasty stuff
+
+  if (keys["1"] && this.cooldowns.addEnemy <= 0) {
+    this.world.addEnemies([new EvilHomer(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
+                                         this.cam.y - 50, this.player)]);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
+  if (keys["2"] && this.cooldowns.addEnemy <= 0) {
+    this.world.addEnemies([new Slider(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
+                                        this.cam.y - 50, this.player)]);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
+  if (keys["3"] && this.cooldowns.addEnemy <= 0) {
+    this.world.addEnemies([new Downer(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
+                                        this.cam.y - 100)]);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
   this.cam.move(dt);
   this.player.move(dt, dir);
 
