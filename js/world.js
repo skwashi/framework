@@ -11,6 +11,7 @@ function World (map, grid, cam) {
     this.enemies = [];
     this.enemyProjectiles = [];
     this.misc = [];
+    this.player = null;
   };
 
   this.reset();
@@ -18,6 +19,10 @@ function World (map, grid, cam) {
 
 World.prototype.addPlayer = function (player) {
   this.player = player;
+};
+
+World.prototype.removePlayer = function () {
+  this.player = null;
 };
 
 World.prototype.addEnemies = function (enemies) {
@@ -32,10 +37,20 @@ World.prototype.addMisc = function (misc) {
   this.misc = this.misc.concat(misc);
 };
 
+World.prototype.addRandomEnemy = function (dt) {  
+  if (Math.random() <= 2*dt) {
+    var type = game.enemyHandler.randomType();
+    this.addEnemies([game.enemyHandler.newEnemy(type, this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()), 
+                                      this.cam.y - 100, this.player)]);
+  }
+};
+
 World.prototype.cleanArray = function (array, dt) {
   var ds;
-  for (var i = array.length-1; i >= 0; i--)
-    if (array[i].remove) {
+  for (var i = array.length-1; i >= 0; i--) {
+    if (array[i].remove)
+      array.splice(i,1);
+    else if (array[i].alive == false) {
       if (array[i].timeToDeath === undefined || array[i].timeToDeath <= 0) {
         ds = array[i].deathSpawn();
         array.splice(i,1);
@@ -45,6 +60,15 @@ World.prototype.cleanArray = function (array, dt) {
         array[i].timeToDeath -= dt;
       }
     }
+  }
+};
+
+World.prototype.updatePlayer = function (dt) {
+  this.player.lowerCooldowns(dt);
+  this.player.move(dt);
+  if (game.colHandler.collidingObjects("enemies", this.player).length != 0) {
+    this.player.takeDamage(50*dt);
+  }
 };
 
 World.prototype.updateProjectiles = function (dt) {
@@ -55,10 +79,13 @@ World.prototype.updateProjectiles = function (dt) {
     if (game.colHandler.inSolid(projectile)) {
       var tile = this.grid.mapTile(this.grid.tileCoords(projectile.x, projectile.y));
       this.tileMap.destroy(tile);
-      projectile.remove = true;
+      projectile.alive = false;
     }
     _.forEach(game.colHandler.collidingObjects("enemies", projectile), 
-              function (enemy) {enemy.remove = true; projectile.remove = true;});
+              function (enemy) {
+                enemy.takeDamage(projectile.damage); 
+                projectile.alive = false;
+              });
     if (this.cam.outOfRange(projectile, 2))
       projectile.remove = true;
   }, this);
@@ -69,17 +96,23 @@ World.prototype.updateEnemies = function (dt) {
   _.forEach(this.enemies, function (enemy) {
     enemy.move(dt);
     game.colHandler.registerObject("enemies", enemy);
+    if (this.cam.outOfRange(enemy, 4))
+      enemy.remove = true;
   }, this);
 };
 
 World.prototype.updateMisc = function (dt) {
   _.forEach(this.misc, function(m) {
     m.move(dt);
-  });
+    if (this.cam.outOfRange(m, 2))
+      m.remove = true;
+  }, this);
 };
 
 World.prototype.update = function (dt) {
-
+  
+  if (this.player != undefined)
+    this.updatePlayer(dt);
   this.updateProjectiles(dt);
   this.updateEnemies(dt);
   this.updateMisc(dt);
@@ -106,9 +139,10 @@ World.prototype.draw = function (context) {
   this.drawArray(context, this.misc);
   this.drawArray(context, this.enemies);
   this.drawArray(context, this.projectiles);
-  
+
   if (this.player != undefined && this.cam.canSee(this.player)) {
     this.player.draw(context, this.cam);
   }
 
 };
+

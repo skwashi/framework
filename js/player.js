@@ -2,29 +2,43 @@ function Player(ship, type, grid, x, y, vx, vy) {
   Movable.call(this, grid, x, y, ship.width, ship.height, ship.color, ship.speed, vx, vy, ship.fx, ship.fy, ship.drag);
   this.ship = ship;
   this.hasSprite = true;
-
   this.type = type; // "free" or "up"
-  
-  this.angle = 0;
-  this.rollAngle = 0;
   this.rollInc = this.ship.rollInc;
   this.rollMax = this.ship.rollMax;
-
-  this.gridLocked = true;
-  this.camLocked = false;
-
   this.cooldown = 0.1;
   this.cooldowns = {laser: 0};
 
-  this.dt = 0;
-  this.flame = 0;
-  this.flameCurrent = 0;
+  this.reset = function () {
+    this.health = this.ship.health;
+    this.angle = 0;
+    this.rollAngle = 0;
+    this.dir = new Vector(0,0);
 
-  this.angleArchive = [0,0,0,0,0,0];
+    this.gridLocked = true;
+    this.camLocked = false;
+   
+    this.resetCooldowns();
 
-  this.dampen = false;
+    this.dt = 0;
+    this.flame = 0;
+    this.flameCurrent = 0;
+
+    this.angleArchive = [0,0,0,0,0,0];
+    this.dampen = false;
+  };
+  
+  this.reset();
 }
 Player.prototype = Object.create(Movable.prototype);
+
+Player.prototype.setDir = function(dir) {
+  this.dir = dir;
+};
+
+Player.prototype.resetCooldowns = function () {
+  for (key in this.cooldowns)
+    this.cooldowns[key] = 0;
+};
 
 Player.prototype.lowerCooldowns = function (dt) {
   for (key in this.cooldowns) {
@@ -53,8 +67,8 @@ Player.prototype.getSprite = function () {
 };
 
 
-Player.prototype.move = function (dt, dir) {
-  
+Player.prototype.move = function (dt) {
+  var dir = this.dir;
   this.dt = dt;
 
   this.flame -= 10*dt + 20*dir.y * dt;

@@ -13,7 +13,7 @@ function MessageHandler() {
     this.showingRS = false;
     this.changed = false;
     this.message = null;
-    this.timeRemaining = -1;
+    this.timeRemaining = false;
   };
 
   this.clear = function () {
@@ -32,16 +32,18 @@ function MessageHandler() {
     this.changed = true;    
   };
 
-  this.render = function () {
+  this.render = function (dt) {
     if (this.changed && this.message != null) {
       this.showMessage(this.message);
     }
-    if (this.timeRemaining == 0) {
-      this.clear();
-      this.timeRemaining = -1;
-    } else if (this.timeRemaining > 0) {
-      this.timeRemaining -= 1;
-    }     
+    if (this.timeRemaining) {
+      if (this.timeRemaining <= 0) {
+        this.clear();
+        this.timeRemaining = false;
+      } else if (this.timeRemaining > 0) {
+        this.timeRemaining -= dt;
+      }     
+    }
   };
 
   this.showMessage = function (message) {
@@ -85,13 +87,6 @@ function MessageHandler() {
   this.nextLevel = function () {
     if (!this.showingNL) {
       this.clear();
-      // Create gradient
-      //var gradient=this.context.createLinearGradient(0, 0, this.width, 0);
-      //gradient.addColorStop("0","magenta");
-      //gradient.addColorStop("0.5","blue");
-      //gradient.addColorStop("1.0","red");
-      // Fill with gradient
-      //this.context.fillStyle=gradient;
       this.context.fillStyle=this.fillStyle;
       this.context.textAlign="center";
       this.context.fillText("Level completed.", this.width/2, this.height/2);  

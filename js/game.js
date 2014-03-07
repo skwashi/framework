@@ -14,6 +14,7 @@ function Game () {
     this.messageHandler = new MessageHandler();
     this.colHandler = new CollisionHandler();
     this.motionHandler = new MotionHandler();
+    this.enemyHandler = new EnemyHandler();
 
     // uninstantiated variables
 
@@ -22,7 +23,8 @@ function Game () {
     this.grid = null;
     this.cam = null;
     this.player = null;
-
+    this.playerAlive = true;
+    
     this.time = Date.now();
     this.campos = null;
 
@@ -83,11 +85,9 @@ Game.prototype.loadEnemies = function (eArray) {
   }, this);
 };
 
-Game.prototype.handleInput = function (dt) {
-  var move = 5 * 60;
-  var dir = new Vector(0,0);
 
-  // camera input
+Game.prototype.handleCameraInput = function (dt) {
+  var move = 5 * 60;
 
   if (keys["q"])
     this.cam.basevel.y -= 60;
@@ -114,37 +114,72 @@ Game.prototype.handleInput = function (dt) {
     this.cam.y += move*dt;
   }
 
-  if (keys["z"]) {
-    this.cam.unFollow();
-    this.cam.centerOn(this.player, dt);
-    this.messageHandler.setMessage("Finding player!", 120);
-  }
-  
+
   if (keys["space"] && this.cooldowns.follow <= 0) {
     if (this.cam.followObject == null) {
-      this.messageHandler.setMessage("Following player!", 120);
+      this.messageHandler.setMessage("Following player!", 2);
       this.cam.follow(this.player, true, true, 1/3, 1/4);
     } else {
       this.cam.unFollow();
-      this.messageHandler.setMessage("Not following player!", 120);
+      this.messageHandler.setMessage("Not following player!", 2);
     }
     this.cooldowns.follow = this.toggleCD;
   }
   
   if (keys["c"] && this.cooldowns.lock <= 0) {
     if (this.player.camLocked == false) {
-      this.messageHandler.setMessage("Player locked to camera!", 120);
+      this.messageHandler.setMessage("Player locked to camera!", 2);
       this.player.camLock(this.cam);
     } else {
       this.player.camUnlock();
-      this.messageHandler.setMessage("Player not locked to camera!", 120);
+      this.messageHandler.setMessage("Player not locked to camera!", 2);
     }
     this.cooldowns.lock = this.toggleCD;
   }
 
+};
 
-  // player input
+
+Game.prototype.handleAdminInput = function (dt) {
   
+  if (keys["1"] && this.cooldowns.addEnemy <= 0) {
+    this.world.addEnemies([new EvilHomer(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
+                                         this.cam.y - 50, this.player)]);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
+  if (keys["2"] && this.cooldowns.addEnemy <= 0) {
+    this.world.addEnemies([new Slider(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
+                                        this.cam.y - 50, this.player)]);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
+  if (keys["3"] && this.cooldowns.addEnemy <= 0) {
+    this.world.addEnemies([new Downer(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
+                                        this.cam.y - 100)]);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
+  if (keys["t"] && this.cooldowns.addEnemy <= 0) {
+    this.randomAdd = ! this.randomAdd;
+    this.messageHandler.setMessage(
+      (this.randomAdd ? "Enabling" : "Disabling") + " random enemies.", 2);
+    this.cooldowns.addEnemy = this.toggleCD/4;
+  }
+
+};
+  
+
+Game.prototype.handlePlayerInput = function (dt) {
+
+  if (keys["z"]) {
+    this.cam.unFollow();
+    this.cam.centerOn(this.player, dt);
+    this.messageHandler.setMessage("Finding player!", 1);
+  }
+
+  var dir = new Vector(0,0);
+
   if (keys["left"]) {
     dir.x -= 1;
   }
@@ -176,29 +211,7 @@ Game.prototype.handleInput = function (dt) {
   else
     this.player.dampen = false;
   
-
-  // Nasty stuff
-
-  if (keys["1"] && this.cooldowns.addEnemy <= 0) {
-    this.world.addEnemies([new EvilHomer(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
-                                         this.cam.y - 50, this.player)]);
-    this.cooldowns.addEnemy = this.toggleCD/4;
-  }
-
-  if (keys["2"] && this.cooldowns.addEnemy <= 0) {
-    this.world.addEnemies([new Slider(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
-                                        this.cam.y - 50, this.player)]);
-    this.cooldowns.addEnemy = this.toggleCD/4;
-  }
-
-  if (keys["3"] && this.cooldowns.addEnemy <= 0) {
-    this.world.addEnemies([new Downer(this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()),
-                                        this.cam.y - 100)]);
-    this.cooldowns.addEnemy = this.toggleCD/4;
-  }
-
-  this.cam.move(dt);
-  this.player.move(dt, dir);
+  this.player.setDir(dir);
 
 };
 
@@ -221,16 +234,34 @@ Game.prototype.lowerCooldowns = function (dt) {
   }
 };
 
+Game.prototype.handlePlayerDeath = function () {
+  this.world.removePlayer();
+  this.player.reset();
+  this.cam.unFollow();
+};
+
 Game.prototype.update = function () {
   var now = Date.now();
   var dt = (now - this.time)/1000;
   this.time = now;
-
-  this.lowerCooldowns(dt);
-  this.player.lowerCooldowns(dt);
   this.frameReset();
-  this.handleInput(dt);
+  this.lowerCooldowns(dt);
+
+  this.handleCameraInput(dt);
+  if (this.player.alive) {
+    this.handleAdminInput(dt);
+    this.handlePlayerInput(dt);
+  }
+
+  if (this.randomAdd)
+    this.world.addRandomEnemy(dt);
+  this.cam.move(dt);
   this.world.update(dt);
+
+  this.messageHandler.render(dt);
+
+  if (!this.player.alive)
+    this.handlePlayerDeath();
 };
 
 Game.prototype.draw = function () {
@@ -244,11 +275,8 @@ Game.prototype.draw = function () {
 
   this.world.draw(this.context);
   this.drawCrosshair();
-  
+
   // draw overlayer
   this.imageHandler.drawLevel(1, this.cam.x, this.cam.y, this.cam.width, this.cam.height);
-
-  // show messages
-  this.messageHandler.render();
 };
 

@@ -1,6 +1,7 @@
-function Ship (width, height, speed, color, fx, fy, drag, omega, filename) {
+function Ship (width, height, health, speed, color, fx, fy, drag, omega, filename) {
   this.width = width;
   this.height = height;
+  this.health = health;
   this.speed = speed;
   this.color = color;
   this.fx = fx;
@@ -38,7 +39,7 @@ Ship.prototype.loadFlameSprites = function(imageRepo) {
 };
 
 function Raptor (color) {
-  Ship.call(this, 45, 52, 700, color, 4200, 4200, 6, 2*Math.PI, "raptor"); // 800, (3200,3200), 6 ; (1200,1200), 0.5
+  Ship.call(this, 45, 52, 100, 700, color, 4200, 4200, 6, 2*Math.PI, "raptor"); // 800, (3200,3200), 6 ; (1200,1200), 0.5
   this.rollInc = 5;
   this.rollMax = 45;
 };

@@ -61,9 +61,19 @@ function Movable(grid, x, y, width, height, color, speed, vx, vy, fx, fy, drag) 
   this.gridLocked = false;
   this.camLocked = false;
   this.cam = null;
-}
 
+  this.alive = true;
+  this.health = 1;
+}
 Movable.prototype = Object.create(Drawable.prototype);
+
+Movable.prototype.takeDamage = function (damage) {
+  this.health -= damage;
+  if (this.health <= 0) {
+    this.health = 0;
+    this.alive = false;
+  };
+};
 
 Movable.prototype.move = function (dt, dir) {
   
@@ -121,7 +131,7 @@ Movable.prototype.split = function (angle) {
   var vx = 600*dx;
   var vy = 600*dy;
   var block = new Projectile(this.grid, x, y, w, h, this.color, this.speed, vx, vy, angle);
-  block.remove = true;
+  block.alive = false;
   block.timeToDeath = 1;
   return block;
 };
