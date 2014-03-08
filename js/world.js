@@ -52,10 +52,18 @@ World.prototype.addMisc = function (misc) {
 };
 
 World.prototype.addRandomEnemy = function (dt) {  
-  if (Math.random() <= 2*dt) {
+  var rand = Math.random();
+  if (rand <= 2*dt) {
     var type = game.enemyHandler.randomType();
     this.addEnemies([game.enemyHandler.newEnemy(type, this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()), 
                                       this.cam.y - 100, this.player)]);
+  } else if (rand <= 3*dt) {
+    var circle = new Exp(this.cam.x + Math.floor(this.cam.width*Math.random()),
+                            this.cam.y + Math.floor(this.cam.height*Math.random()),
+                            1, 100, "yellow");
+    circle.alive = false;
+    circle.timeToDeath = 5;
+    this.add("large", [circle]);
   }
 };
 
@@ -86,7 +94,7 @@ World.prototype.updatePlayer = function (dt) {
   }
   _.forEach(this.objects.large, function (l) {
     if (this.player.collides(l))
-      this.player.takeDamage(100*dt);
+      this.player.takeDamage(l.damage*dt);
   }, this);
 };
 

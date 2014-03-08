@@ -8,7 +8,7 @@ Mover.prototype = Object.create(Movable.prototype);
 function Targeter(grid, x, y, width, height, color, speed, target) {
   Movable.call(this, grid, x, y, width, height, color, speed, 0, 0);
   var dir;
-  if (target === undefined || target.alive == false)
+  if (target == undefined || target.alive == false)
     dir = new Vector(Math.random()*2 - 1, Math.random()*2 - 1);
   else
     dir = new Vector(target.getCenter().x - this.getCenter().x,
@@ -29,7 +29,7 @@ Homer.prototype = Object.create(Movable.prototype);
 
 Homer.prototype.move = function (dt) {
   var dir;
-  if (this.target === undefined || this.target == null || this.target.alive == false)
+  if (this.target == undefined || this.target == null || this.target.alive == false)
     dir = new Vector(Math.random()*2 - 1, Math.random()*2 - 1);
   else 
     dir = new Vector(this.target.getCenter().x - this.getCenter().x, 
@@ -63,3 +63,19 @@ function EvilHomer(grid, x, y, target) {
   this.addSprite(game.imageRepo.get("imgs/shark1a.png"));
 };
 EvilHomer.prototype = Object.create(Homer.prototype);
+
+function Exp(x, y, r, rt, color) {
+  Circle.call(this, x, y, r, color);
+  this.rt = rt;
+  this.damage = r;
+  this.alive = true;
+  this.health = 40000;
+};
+Exp.prototype = Object.create(Circle.prototype);
+
+Exp.prototype.move = function (dt) {
+  this.r += this.rt*dt;
+  this.damage = this.r;
+};
+
+Exp.prototype.deathSpawn = function () { return []; };

@@ -1,5 +1,5 @@
 function EnemyHandler () {
-  this.types = ["Downer", "Slider", "EvilHomer"];
+  this.types = ["Downer", "Slider", "EvilHomer", "Circle"];
 };
 
 EnemyHandler.prototype.randomType = function () {

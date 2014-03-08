@@ -3,8 +3,8 @@ function Rectangle(x, y, width, height, color, angle) {
   this.y = y;
   this.width = width;
   this.height = height;
-  this.color = color;
-  this.angle = angle;
+  this.color = color || "black";
+  this.angle = angle || 0;
 
   this.set = function (x, y, w, h) {
     this.x = x;

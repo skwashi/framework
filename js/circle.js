@@ -1,7 +1,6 @@
-function Circle(cx, cy, r, rt, color) {
+function Circle(cx, cy, r, color) {
   this.center = new Vector(cx, cy);
   this.r = r;
-  this.rt = rt;
   this.color = color;
 }
 
@@ -14,10 +13,6 @@ Circle.prototype.getBox = function (box) {
 
 Circle.prototype.contains = function (vector) {
   return (this.center.distance(vector) <= this.r);
-};
-
-Circle.prototype.move = function (dt) {
-  this.r += this.rt*dt;
 };
 
 Circle.prototype.draw = function (context, cam) {
