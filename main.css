@@ -2,9 +2,16 @@ body {
     background-color: white;
 }
 
+#controls {
+    position:absolute;
+    top:50%;
+    margin-top:-300px;
+    margin-left:10px;
+}
+
 #content {
-    position:absolute; 
-    top:50%; 
+    position:absolute;
+    top:50%;
     margin-top:-300px; 
     left:50%; 
     margin-left:-400px;

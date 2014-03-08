@@ -6,9 +6,35 @@
 </head>
 <body oncontextmenu="return false">
   <audio src="audio/traps.mp3" autoplay="autoplay" loop="loop"></audio>
-
   <link rel="stylesheet" href="main.css" type="text/css"/>
-  
+
+  <div id="controls">
+    <p> Player controls: </p>
+    <p> 
+      arrow keys: move ship <br>
+      m: change control mode <br>
+      v: slow player movement <br>
+      u: "unstuck" player <br>
+      x: fire <br>
+    </p>
+    <hr>
+    <p> Camera controls: </p>
+    <p>
+      wasd: move camera <br>
+      space: follow player <br>
+      z: move to player <br>
+      c: lock player inside camera <br>
+      q: increase  vertical speed <br>
+      e: decrease vertical speed <br>
+    </p>
+    <hr>
+    <p> Modify world: </p>
+    <p>
+      1-3: spawn enemies <br>
+      t: turn on/off random enemy spawning <br>
+    </p>
+  </div>
+
   <div id="content">
     <canvas id="canvas" width=800px height=600px></canvas>
     <canvas id="messages" width=800px height=600px></canvas>
