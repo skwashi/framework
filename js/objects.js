@@ -1,5 +1,5 @@
-function Drawable(grid, x, y, width, height, color) {
-  Rectangle.call(this, x, y, width, height);
+function Drawable(grid, x, y, width, height, color, angle) {
+  Rectangle.call(this, x, y, width, height, angle);
   this.grid = grid;
   this.color = color;
   this.hasSprite = false;
@@ -64,15 +64,28 @@ function Movable(grid, x, y, width, height, color, speed, vx, vy, fx, fy, drag) 
 
   this.alive = true;
   this.health = 1;
+
+  this.followPath = false;
+  this.path = null;
+  this.goal = null;
+  this.goalDir = null;
 }
 Movable.prototype = Object.create(Drawable.prototype);
 
-Movable.prototype.takeDamage = function (damage) {
-  this.health -= damage;
-  if (this.health <= 0) {
-    this.health = 0;
-    this.alive = false;
-  };
+Movable.prototype.setPath = function (path) {
+  this.followPath = true;
+  this.path = path;
+};
+
+Movable.prototype.moveOnPath = function (dt) {
+  if (this.goal == null || this.contains(this.goal)) {
+    this.goal = this.path.getNext();
+    this.goalDir = this.goal.subtract(this.getCenter());
+    this.goalDir.normalize();
+  }
+
+  this.vx = this.speed * this.goalDir.x;
+  this.vy = this.speed * this.goalDir.y;
 };
 
 Movable.prototype.move = function (dt, dir) {
@@ -80,6 +93,10 @@ Movable.prototype.move = function (dt, dir) {
   if (!(dir === undefined)) {
     this.vx += this.fx*dir.x*dt;
     this.vy += this.fy*dir.y*dt;
+  }
+
+  if (this.followPath != false) {
+    this.moveOnPath(dt);
   }
 
   if (this.drag != 0) {
@@ -111,6 +128,14 @@ Movable.prototype.camUnlock = function () {
   this.camLocked = false;
   this.cam = null;
   this.basevel = {x: 0, y: 0};
+};
+
+Movable.prototype.takeDamage = function (damage) {
+  this.health -= damage;
+  if (this.health <= 0) {
+    this.health = 0;
+    this.alive = false;
+  };
 };
 
 Movable.prototype.deathSpawn = function () {

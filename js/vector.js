@@ -30,8 +30,8 @@ function Vector(x, y) {
   this.normalize = function () {
     var l = this.length();
     if (l != 0) {
-      this.x /= this.length();
-      this.y /= this.length();
+      this.x /= l;
+      this.y /= l;
     }
   };
 
@@ -40,6 +40,12 @@ function Vector(x, y) {
   };
 
 }
+
+Vector.prototype.distance = function (v) {
+  var x = v.x - this.x;
+  var y = v.y - this.y;
+  return Math.sqrt(x*x + y*y);
+};
 
 Vector.prototype.equals = function (v) {
   return this.x == v.x && this.y == v.y;

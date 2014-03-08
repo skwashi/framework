@@ -72,17 +72,21 @@ Game.prototype.loadMap = function (filename) {
     that.motionHandler.init(that.grid, "air");   
     
     that.loadEnemies(that.map.getObjects("enemies"));
-    
+    that.world.add("large", [new Circle(1000, 300, 1, 200, "yellow")]);    
     that.time = Date.now();
   }, 2000);
-  
 };
 
 Game.prototype.loadEnemies = function (eArray) {
-  this.world.enemies = _.map(eArray, function (espec) {
+  this.world.addEnemies (_.map(eArray, function (espec) {
     return new Movable(this.grid, espec.x, espec.y, espec.width, espec.height, 
                        espec.color || "red", espec.speed || 500, espec.properties.vx || 0, espec.properties.vy || 0);
-  }, this);
+  }, this));
+  _.forEach(this.world.objects.enemies, function (e) {
+    e.setPath(new Path([new Vector(100, 100), new Vector(1000,100),
+                        new Vector(1000,1000), new Vector(100, 1000)],
+                       "cycle"));
+  });
 };
 
 
@@ -274,7 +278,7 @@ Game.prototype.draw = function () {
   this.imageHandler.drawLevel(0, this.cam.x, this.cam.y, this.cam.width, this.cam.height);
 
   this.world.draw(this.context);
-  this.drawCrosshair();
+  //this.drawCrosshair();
 
   // draw overlayer
   this.imageHandler.drawLevel(1, this.cam.x, this.cam.y, this.cam.width, this.cam.height);

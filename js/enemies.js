@@ -56,7 +56,9 @@ function Slider(grid, x, y, target) {
 Slider.prototype = Object.create(Targeter.prototype);
 
 function EvilHomer(grid, x, y, target) {
-  Homer.call(this, grid, x, y, 20, 50, "darkgrey", 1000, 0, 0, 2000, 2000, 6, target);
+  Homer.call(this, grid, x, y, 40, 80, "darkgrey", 1000, 0, 0, 2000, 2000, 6, target);
   this.health = 2;
+  this.sprite = game.imageRepo.get("imgs/shark1a.png");
+  this.hasSprite = true;
 };
 EvilHomer.prototype = Object.create(Homer.prototype);

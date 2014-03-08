@@ -3,7 +3,7 @@ function Rectangle(x, y, width, height, angle) {
   this.y = y;
   this.width = width;
   this.height = height;
-  this.angle = angle || 0;
+  this.angle = angle;
   
   this.set = function (x, y, w, h) {
     this.x = x;
@@ -20,6 +20,11 @@ function Rectangle(x, y, width, height, angle) {
   this.getCenter = function () {
     return {x:this.x + this.width/2, y: this.y + this.width/2};
   };
+};
+
+Rectangle.prototype.contains = function (vector) {
+  return (vector.x >= this.x && vector.x < this.x + this.width &&
+          vector.y >= this.y && vector.y < this.y + this.height);
 };
 
 Rectangle.prototype.adjustToRectangle = function (rect) {
@@ -109,4 +114,18 @@ Rectangle.prototype.collides = function (rectangle) {
   
   return (rx < x + w && x < rx + rw &&
 	  ry < y + h && y < ry + rh);
+};
+
+Rectangle.prototype.isSeen = function (cam) {
+  return !(this.x + this.width < cam.x ||
+	  this.x > cam.x + cam.width ||
+	  this.y + this.height < cam.y ||
+	  this.y > cam.y + cam.height);
+};
+
+Rectangle.prototype.outOfRange = function (rect, range) {
+  return (this.x + this.width < rect.x - range ||
+          this.x > rect.x + rect.width + range ||
+          this.y + this.height < rect.y - range||
+          this.y > rect.y + rect.height + range);
 };
