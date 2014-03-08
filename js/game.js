@@ -72,7 +72,7 @@ Game.prototype.loadMap = function (filename) {
     that.motionHandler.init(that.grid, "air");   
     
     that.loadEnemies(that.map.getObjects("enemies"));
-    that.world.add("large", [new Circle(1000, 300, 1, 200, "yellow")]);
+    //that.world.add("large", [new Circle(1000, 300, 1, 200, "yellow")]);
     that.time = Date.now();
   }, 2000);
 };

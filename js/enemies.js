@@ -46,19 +46,20 @@ Homer.prototype.move = function (dt) {
 function Downer(grid, x, y) {
   Movable.call(this, grid, x, y, 30, 60, "blue", 500, 0, 500);
   this.health = 2;
+  this.addSprite(game.imageRepo.get("imgs/hemskeld.png"));
 };
 Downer.prototype = Object.create(Movable.prototype);
 
 function Slider(grid, x, y, target) {
   Targeter.call(this, grid, x, y, 30, 60, "red", 1000, target);
   this.health = 2;
+  this.addSprite(game.imageRepo.get("imgs/shuriken50.gif"));
 };
 Slider.prototype = Object.create(Targeter.prototype);
 
 function EvilHomer(grid, x, y, target) {
   Homer.call(this, grid, x, y, 40, 80, "darkgrey", 1000, 0, 0, 2000, 2000, 6, target);
   this.health = 2;
-  this.sprite = game.imageRepo.get("imgs/shark1a.png");
-  this.hasSprite = true;
+  this.addSprite(game.imageRepo.get("imgs/shark1a.png"));
 };
 EvilHomer.prototype = Object.create(Homer.prototype);

@@ -111,8 +111,8 @@ Rectangle.prototype.collides = function (shape) {
   if (shape instanceof Rectangle) {
     var x = this.x; var y = this.y;
     var w = this.width; var h = this.height;
-    var rx = rectangle.x; var ry = rectangle.y;
-    var rw = rectangle.width; var rh = rectangle.height;
+    var rx = shape.x; var ry = shape.y;
+    var rw = shape.width; var rh = shape.height;
     
     return (rx < x + w && x < rx + rw &&
 	    ry < y + h && y < ry + rh);
