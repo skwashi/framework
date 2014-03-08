@@ -1,7 +1,6 @@
 function Drawable(grid, x, y, width, height, color, angle) {
-  Rectangle.call(this, x, y, width, height, angle);
+  Rectangle.call(this, x, y, width, height, color, angle);
   this.grid = grid;
-  this.color = color;
   this.hasSprite = false;
   this.sprite = null;
 }

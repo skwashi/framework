@@ -9,6 +9,8 @@ function Grid (width, height, tileWidth, tileHeight, openX, openY) {
     this.numCols = Math.floor(width / tileWidth);
     this.openX = openX;
     this.openY = openY;
+
+    this.testBox = new Rectangle(0, 0, 1, 1);
   };
   
   this.init(width, height, tileWidth, tileHeight, openX, openY);
@@ -43,11 +45,18 @@ Grid.prototype.isInside = function (rectangle) {
     rectangle.y >= 0 && rectangle.y + rectangle.height <= this.height;
 };
 
-Grid.prototype.tilesIntersected = function (rectangle) {
-  var left = Math.floor(rectangle.x / this.tileWidth);
-  var right = Math.floor((rectangle.x + rectangle.width-1) / this.tileWidth);
-  var top = Math.floor(rectangle.y / this.tileHeight);
-  var bottom = Math.floor((rectangle.y + rectangle.height-1) / this.tileHeight);
+Grid.prototype.tilesIntersected = function (shape) {
+  var box;
+  if (shape instanceof Circle) {
+    shape.getBox(this.testBox);
+    box = this.testBox;
+  } else
+    box = shape;
+
+  var left = Math.floor(box.x / this.tileWidth);
+  var right = Math.floor((box.x + box.width-1) / this.tileWidth);
+  var top = Math.floor(box.y / this.tileHeight);
+  var bottom = Math.floor((box.y + box.height-1) / this.tileHeight);
   
   var tiles = [];
   

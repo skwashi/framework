@@ -84,13 +84,17 @@ World.prototype.updatePlayer = function (dt) {
   if (game.colHandler.collidingObjects("enemies", this.player).length != 0) {
     this.player.takeDamage(50*dt);
   }
+  _.forEach(this.objects.large, function (l) {
+    if (this.player.collides(l))
+      this.player.takeDamage(100*dt);
+  }, this);
 };
 
 World.prototype.updateProjectiles = function (dt) {
-  game.colHandler.clearBuckets("projectiles");
+  //game.colHandler.clearBuckets("projectiles");
   _.forEach(this.objects.projectiles, function (projectile) {
     projectile.move(dt);
-    game.colHandler.registerObject("projectiles", projectile);
+    //game.colHandler.registerObject("projectiles", projectile);
     if (game.colHandler.inSolid(projectile)) {
       var tile = this.grid.mapTile(this.grid.tileCoords(projectile.x, projectile.y));
       this.tileMap.destroy(tile);
@@ -102,8 +106,8 @@ World.prototype.updateProjectiles = function (dt) {
                 projectile.alive = false;
               });
     if (projectile.outOfRange(this.cam, 2*this.cam.width) &&
-       (this.player == null || 
-        projectile.outOfRange(this.player, 2*this.cam.width)))
+        (this.player == null || 
+         projectile.outOfRange(this.player, 2*this.cam.width)))
       projectile.remove = true;
   }, this);
 };
@@ -133,6 +137,11 @@ World.prototype.updateMisc = function (dt) {
 World.prototype.updateLarge = function (dt) {
   _.forEach(this.objects.large, function(l) {
     l.move(dt);
+    _.forEach(this.objects.enemies, 
+              function (enemy) {
+                if (enemy.collides(l))
+                  enemy.takeDamage(1);
+              });
     if (l.outOfRange(this.cam, 2*this.cam.width) &&
         (this.player == null ||
          l.outOfRange(this.player, 2*this.cam.width)))

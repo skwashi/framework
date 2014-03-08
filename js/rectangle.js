@@ -1,10 +1,11 @@
-function Rectangle(x, y, width, height, angle) {
+function Rectangle(x, y, width, height, color, angle) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
+  this.color = color;
   this.angle = angle;
-  
+
   this.set = function (x, y, w, h) {
     this.x = x;
     this.y = y;
@@ -106,14 +107,19 @@ Rectangle.prototype.span = function (rectangle) {
   return new Rectangle(x, y, w, h);
 };
 
-Rectangle.prototype.collides = function (rectangle) {
-  var x = this.x; var y = this.y;
-  var w = this.width; var h = this.height;
-  var rx = rectangle.x; var ry = rectangle.y;
-  var rw = rectangle.width; var rh = rectangle.height;
-  
-  return (rx < x + w && x < rx + rw &&
-	  ry < y + h && y < ry + rh);
+Rectangle.prototype.collides = function (shape) {
+  if (shape instanceof Rectangle) {
+    var x = this.x; var y = this.y;
+    var w = this.width; var h = this.height;
+    var rx = rectangle.x; var ry = rectangle.y;
+    var rw = rectangle.width; var rh = rectangle.height;
+    
+    return (rx < x + w && x < rx + rw &&
+	    ry < y + h && y < ry + rh);
+  } else if (shape instanceof Circle)
+    return shape.collides(this);
+  else
+    return false;
 };
 
 Rectangle.prototype.isSeen = function (cam) {
