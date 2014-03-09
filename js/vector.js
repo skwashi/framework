@@ -5,26 +5,31 @@ function Vector(x, y) {
   this.init = function (x, y) {
     this.x = x;
     this.y = y;
+    return this;
   };
 
   this.set = function (v) {
     this.x = v.x;
     this.y = v.y;
+    return this;
   };
   
   this.increase = function (v) {
     this.x += v.x;
     this.y += v.y;
+    return this;
   };
 
   this.decrease = function (v) {
     this.x -= v.x;
     this.y -= v.y;
+    return this;
   };
 
   this.scale = function (a) {
     this.x *= a;
     this.y *= a;
+    return this;
   };
 
   this.normalize = function () {
@@ -33,6 +38,7 @@ function Vector(x, y) {
       this.x /= l;
       this.y /= l;
     }
+    return this;
   };
 
   this.isZero = function () {

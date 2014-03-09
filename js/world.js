@@ -57,12 +57,12 @@ World.prototype.addRandomEnemy = function (dt) {
     var type = game.enemyHandler.randomType();
     this.addEnemies([game.enemyHandler.newEnemy(type, this.grid, this.cam.x + Math.floor(this.cam.width*Math.random()), 
                                       this.cam.y - 100, this.player)]);
-  } else if (rand <= 3*dt) {
+  } else if (rand <= 2.5*dt) {
     var circle = new Exp(this.cam.x + Math.floor(this.cam.width*Math.random()),
                             this.cam.y + Math.floor(this.cam.height*Math.random()),
                             1, 100, "yellow");
-    circle.alive = false;
-    circle.timeToDeath = 5;
+    //circle.alive = false;
+    //circle.timeToDeath = 3;
     this.add("large", [circle]);
   }
 };
@@ -145,11 +145,6 @@ World.prototype.updateMisc = function (dt) {
 World.prototype.updateLarge = function (dt) {
   _.forEach(this.objects.large, function(l) {
     l.move(dt);
-    _.forEach(this.objects.enemies, 
-              function (enemy) {
-                if (enemy.collides(l))
-                  enemy.takeDamage(1);
-              });
     if (l.outOfRange(this.cam, 2*this.cam.width) &&
         (this.player == null ||
          l.outOfRange(this.player, 2*this.cam.width)))

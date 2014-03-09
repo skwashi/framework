@@ -44,16 +44,17 @@ Homer.prototype.move = function (dt) {
 // Particular enemy classes
 
 function Downer(grid, x, y) {
-  Movable.call(this, grid, x, y, 30, 60, "blue", 500, 0, 500);
+  Movable.call(this, grid, x, y, 24, 51, "orange", 500, 0, 500);
   this.health = 2;
   this.addSprite(game.imageRepo.get("imgs/hemskeld.png"));
 };
 Downer.prototype = Object.create(Movable.prototype);
 
 function Slider(grid, x, y, target) {
-  Targeter.call(this, grid, x, y, 30, 60, "red", 1000, target);
+  Targeter.call(this, grid, x, y, 24, 51, "yellow", 1000, target);
   this.health = 2;
-  this.addSprite(game.imageRepo.get("imgs/shuriken50.gif"));
+  this.addSprite(game.imageRepo.get("imgs/hemskeld2.png"));
+  //this.addSprite(game.imageRepo.get("imgs/shuriken50.gif"));
 };
 Slider.prototype = Object.create(Targeter.prototype);
 
@@ -70,11 +71,20 @@ function Exp(x, y, r, rt, color) {
   this.damage = r;
   this.alive = true;
   this.health = 40000;
+  this.time = 0;
 };
 Exp.prototype = Object.create(Circle.prototype);
 
 Exp.prototype.move = function (dt) {
+  // r = r0 + rt0*t - k/2*t^2 (k = 10);
+  this.time += dt;
+  this.rt -= 30*dt;
   this.r += this.rt*dt;
+  this.r = Math.max(this.r, 0);
+  if (this.r <= 0) {
+    this.alive = false;
+    this.timeToDeath = 0;
+  }
   this.damage = this.r;
 };
 
