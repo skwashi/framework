@@ -165,11 +165,11 @@ Player.prototype.fire = function (type) {
   var projectiles;
   var dir = this.getDirection();
   var angle = Math.atan2(dir.y, dir.x);
-  var vel = dir.multiply(600);
+  var vel = dir.multiply(1200);
   vel.x += (this.camLocked && !this.cam.folX) ? this.cam.basevel.x : 0;
-  vel.x += this.vx;
+  //vel.x += this.vx;
   vel.y += (this.camLocked && !this.cam.folY) ? this.cam.basevel.y : 0;
-  vel.y += this.vy;
+  //vel.y += this.vy;
   var orth = this.getOrthogonal();
 
   projectiles = [new Laser(this.grid, this.getCenter().x-22*orth.x, this.getCenter().y-22*orth.y, vel.x, vel.y, angle),
